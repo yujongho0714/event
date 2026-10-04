@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>체험 신청 명단</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#eef0f6; --card:#fff; --ink:#151a2e; --muted:#5b6380; --line:#dadde9; --navy:#14214f; --gold:#ffd65a; --red:#d62828; --ok:#2e9e4f;
+  --display:"Black Han Sans","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --body:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --bg:#0d1226; --card:#171e3a; --ink:#eef0f8; --muted:#a3a9c2; --line:#2c355a; } }
+:root[data-theme="dark"]{ --bg:#0d1226; --card:#171e3a; --ink:#eef0f8; --muted:#a3a9c2; --line:#2c355a; }
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body)}
+button,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid #4d8bff;outline-offset:2px}
+.hidden{display:none!important}
+header{background:var(--navy);color:#fff;padding:16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+header h1{margin:0;font-family:var(--display);font-weight:400;font-size:24px;color:var(--gold)}
+header small{display:block;font-size:12px;color:rgba(255,255,255,.75);margin-top:2px}
+.wrap{max-width:760px;margin:0 auto;padding:14px 12px 40px}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--card);font-weight:700;font-size:14px;cursor:pointer;text-decoration:none;color:var(--ink)}
+.btn.main{background:var(--red);border-color:var(--red);color:#fff;font-size:17px;padding:14px 22px}
+header .btn{background:transparent;color:#fff;border-color:rgba(255,255,255,.35)}
+.center{text-align:center;padding:60px 16px}
+.center p{color:var(--muted);line-height:1.6}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.bar select{padding:9px 10px;border-radius:10px;border:1.5px solid var(--line);background:var(--card)}
+.bar .sum{margin-left:auto;font-weight:700;color:var(--muted);font-size:14px}
+.item{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:10px}
+.item.done{opacity:.55}
+.item .top{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.item .who{font-family:var(--display);font-weight:400;font-size:20px}
+.item .when{font-size:12px;color:var(--muted)}
+.item .info{margin:6px 0 10px;font-size:15px;line-height:1.55}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--bg);margin-right:4px}
+.tag.b{background:var(--navy);color:#fff}
+.tag.m{background:#fff4d1;color:#8a5a00}
+.acts{display:flex;gap:6px;flex-wrap:wrap}
+.acts .btn{padding:8px 12px;font-size:13px}
+.acts .btn.done-on{border-color:var(--ok);color:var(--ok)}
+.acts .del{margin-left:auto;color:var(--red)}
+.note{font-size:13px;color:var(--muted);line-height:1.6;margin-top:16px}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>체험 신청 명단</h1><small>격파 이벤트 · 관장님 전용</small></div>
+  <button class="btn hidden" id="logoutBtn" type="button">로그아웃</button>
+</header>
+<div class="wrap">
+  <div class="center" id="loginBox">
+    <p>구글 계정으로 로그인하면 신청 명단이 보여요.</p>
+    <button class="btn main" id="loginBtn" type="button">구글로 로그인</button>
+    <p id="loginMsg"></p>
+  </div>
+
+  <div id="listBox" class="hidden">
+    <div class="bar">
+      <select id="fBranch" aria-label="도장 선택"><option value="">전체 도장</option><option value="2관">2관</option><option value="1·3관">1·3관</option></select>
+      <select id="fDone" aria-label="연락 상태"><option value="">전체</option><option value="todo">연락 전</option><option value="done">연락 완료</option></select>
+      <button class="btn" id="csvBtn" type="button">엑셀(CSV) 받기</button>
+      <span class="sum" id="sum"></span>
+    </div>
+    <div id="list"></div>
+    <p class="note">보관 기간(이벤트 후 3개월)이 지나면 <button class="btn" id="cleanBtn" type="button">3개월 지난 신청 삭제</button> 를 눌러 정리해 주세요.</p>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+(function(){
+"use strict";
+var firebaseConfig={
+  apiKey:"AIzaSyBhQaR8YuG4CovQgFBaPKd2nZSO7ZjP0PY",
+  authDomain:"taekwondo-wordgame.firebaseapp.com",
+  databaseURL:"https://taekwondo-wordgame-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:"taekwondo-wordgame",
+  storageBucket:"taekwondo-wordgame.firebasestorage.app",
+  messagingSenderId:"376591184218",
+  appId:"1:376591184218:web:d4a4ee50773e787e300363"
+};
+var $=function(id){return document.getElementById(id);};
+firebase.initializeApp(firebaseConfig);
+var auth=firebase.auth(), db=firebase.database(), ref=db.ref("event_signups");
+var rows=[], listening=false;
+
+$("loginBtn").addEventListener("click",function(){
+  var p=new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(p).catch(function(e){
+    if(e&&(e.code==="auth/popup-blocked"||e.code==="auth/operation-not-supported-in-this-environment")) return auth.signInWithRedirect(p);
+    $("loginMsg").textContent="로그인하지 못했어요: "+(e&&e.code||e);
+  });
+});
+$("logoutBtn").addEventListener("click",function(){ auth.signOut(); });
+
+auth.onAuthStateChanged(function(u){
+  if(!u){ $("loginBox").classList.remove("hidden"); $("listBox").classList.add("hidden"); $("logoutBtn").classList.add("hidden"); if(listening){ref.off();listening=false;} return; }
+  $("logoutBtn").classList.remove("hidden");
+  $("loginMsg").textContent="";
+  listening=true;
+  ref.on("value",function(snap){
+    rows=[]; snap.forEach(function(ch){ var v=ch.val()||{}; v.id=ch.key; rows.push(v); });
+    rows.sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);});
+    $("loginBox").classList.add("hidden"); $("listBox").classList.remove("hidden");
+    render();
+  },function(err){
+    listening=false;
+    $("loginBox").classList.remove("hidden"); $("listBox").classList.add("hidden");
+    $("loginMsg").textContent=u.email+" 계정은 명단을 볼 권한이 없어요. 보안 규칙의 이메일을 확인해 주세요.";
+  });
+});
+
+function fmtTime(t){ if(!t) return ""; var d=new Date(t); return (d.getMonth()+1)+"/"+d.getDate()+" "+d.getHours()+":"+("0"+d.getMinutes()).slice(-2); }
+function fmtPhone(p){ p=String(p||""); return p.length===11?p.slice(0,3)+"-"+p.slice(3,7)+"-"+p.slice(7):p.length===10?p.slice(0,3)+"-"+p.slice(3,6)+"-"+p.slice(6):p; }
+function visitText(v){ if(!v) return ""; if(v==="오늘") return "당일 방문"; var p=v.split("-"); if(p.length!==3) return v; var d=new Date(+p[0],+p[1]-1,+p[2]); return (d.getMonth()+1)+"월 "+d.getDate()+"일("+"일월화수목금토"[d.getDay()]+")"; }
+function filtered(){
+  var fb=$("fBranch").value, fd=$("fDone").value;
+  return rows.filter(function(r){ return (!fb||r.branch===fb)&&(!fd||(fd==="done"?r.done:!r.done)); });
+}
+function el(tag,cls,txt){ var e=document.createElement(tag); if(cls) e.className=cls; if(txt!=null) e.textContent=txt; return e; }
+function render(){
+  var list=$("list"), data=filtered(); list.innerHTML="";
+  $("sum").textContent="총 "+data.length+"건 · 연락 전 "+data.filter(function(r){return !r.done;}).length+"건";
+  if(!data.length){ list.appendChild(el("p","note","아직 신청이 없어요. QR로 신청이 들어오면 여기에 바로 나타나요.")); return; }
+  data.forEach(function(r){
+    var box=el("div","item"+(r.done?" done":""));
+    var top=el("div","top"); top.appendChild(el("span","who",fmtPhone(r.phone))); top.appendChild(el("span","when","신청 "+fmtTime(r.createdAt))); box.appendChild(top);
+    var info=el("div","info");
+    info.appendChild(el("span","tag b",r.branch||""));
+    if(r.prize) info.appendChild(el("span","tag",r.prize));
+    if(r.marketing) info.appendChild(el("span","tag m","소식 문자 동의"));
+    info.appendChild(document.createElement("br"));
+    info.appendChild(document.createTextNode(visitText(r.visit)+" · "+(r.cls||"")+" · "+(r.kids||"")));
+    box.appendChild(info);
+    var acts=el("div","acts");
+    var call=el("a","btn","전화"); call.href="tel:"+r.phone; acts.appendChild(call);
+    var sms=el("a","btn","문자"); sms.href="sms:"+r.phone; acts.appendChild(sms);
+    var dn=el("button","btn"+(r.done?" done-on":""),r.done?"연락 완료 ✓":"연락 완료로 표시"); dn.type="button";
+    dn.addEventListener("click",function(){ ref.child(r.id).update({done:!r.done}); }); acts.appendChild(dn);
+    var del=el("button","btn del","삭제"); del.type="button";
+    del.addEventListener("click",function(){ if(confirm(fmtPhone(r.phone)+" 신청을 삭제할까요?")) ref.child(r.id).remove(); }); acts.appendChild(del);
+    box.appendChild(acts); list.appendChild(box);
+  });
+}
+$("fBranch").addEventListener("change",render); $("fDone").addEventListener("change",render);
+
+$("csvBtn").addEventListener("click",function(){
+  var head=["신청시각","도장","당첨","방문일","수업","아이","보호자 연락처","소식 문자 동의","연락 완료"];
+  var q=function(s){ s=String(s==null?"":s); return '"'+s.replace(/"/g,'""')+'"'; };
+  var lines=[head.map(q).join(",")];
+  filtered().forEach(function(r){ lines.push([new Date(r.createdAt||0).toLocaleString("ko-KR"),r.branch,r.prize,visitText(r.visit),r.cls,r.kids,fmtPhone(r.phone),r.marketing?"동의":"",r.done?"완료":""].map(q).join(",")); });
+  var blob=new Blob(["\ufeff"+lines.join("\r\n")],{type:"text/csv;charset=utf-8"});
+  var a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="체험신청명단.csv"; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){URL.revokeObjectURL(a.href);},2000);
+});
+$("cleanBtn").addEventListener("click",function(){
+  var limit=Date.now()-1000*60*60*24*92, old=rows.filter(function(r){return (r.createdAt||0)<limit;});
+  if(!old.length){ alert("3개월 지난 신청이 없어요."); return; }
+  if(!confirm(old.length+"건을 삭제할까요? 되돌릴 수 없어요.")) return;
+  var up={}; old.forEach(function(r){ up[r.id]=null; }); ref.update(up);
+});
+})();
+</script>
+</body>
+</html>
