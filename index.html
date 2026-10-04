@@ -101,8 +101,20 @@ input:focus,textarea:focus,select:focus{border-color:#4d8bff;outline:none}
 .title-bar i:first-child{background:#d62828}
 .title-bar i:last-child{background:#1f4fbf}
 .stage-title p{margin:12px 0 0;font-size:clamp(15px,2.6vw,22px);font-weight:700;color:#444;word-break:keep-all;line-height:1.45}
-.btn-area{grid-area:btn;display:flex;justify-content:center}
-#stage.landscape .btn-area{align-self:start;justify-content:flex-start;padding-left:8px}
+.btn-area{grid-area:btn;display:flex;flex-direction:column;align-items:center;gap:12px}
+#stage.landscape .btn-area{align-self:start;align-items:flex-start;padding-left:8px}
+.lives{display:flex;align-items:center;gap:10px}
+.lives-label{font-weight:700;font-size:15px;color:#444}
+.hearts{display:flex;gap:6px}
+.heart{width:clamp(30px,4.4vw,42px);height:clamp(28px,4vw,38px);display:block}
+.heart path{fill:#d62828;stroke:#111;stroke-width:1.4;transition:fill .25s}
+.heart.empty path{fill:#e7e8ec;stroke:#b5b8c0}
+.heart.lose{animation:heartLose .6s ease-out}
+.heart.pop{animation:heartPop .4s ease-out both}
+@keyframes heartLose{0%{transform:scale(1)}25%{transform:scale(1.45) rotate(-8deg)}50%{transform:scale(.8) rotate(6deg)}100%{transform:scale(1)}}
+@keyframes heartPop{0%{transform:scale(.3);opacity:0}70%{transform:scale(1.15);opacity:1}100%{transform:scale(1)}}
+.life-note{font-size:16px;font-weight:700;color:#444;margin:-4px 0 12px}
+@media (prefers-reduced-motion: reduce){ .heart.lose,.heart.pop{animation:none} }
 .wheel-zone{grid-area:wheel;position:relative;display:flex;align-items:center;justify-content:center;min-height:0;min-width:0}
 .floor{position:absolute;left:50%;transform:translateX(-50%);border-radius:50%;background:radial-gradient(ellipse at center,rgba(0,0,0,.22),rgba(0,0,0,0) 70%)}
 .wheel-3d{position:relative;transform:perspective(1600px) rotateX(9deg)}
@@ -206,6 +218,18 @@ button,.btn,.chip{-webkit-user-select:none;user-select:none;touch-action:manipul
   </section>
 
   <section class="block">
+    <h2>참가 규칙</h2>
+    <p class="hint">참가자 한 명이 돌릴 수 있는 횟수(하트)를 정해요. '꼭 당첨될 칸'은 그 기회 중 반드시 한 번 나오고, 나머지 기회는 다른 칸 중에서 나와요.</p>
+    <label class="f" for="inLives">1명당 기회</label>
+    <select id="inLives"><option value="1">1번</option><option value="2">2번</option><option value="3">3번</option><option value="4">4번</option><option value="5">5번</option></select>
+    <label class="f" for="inGuar">꼭 한 번 당첨될 칸</label>
+    <select id="inGuar"></select>
+    <label class="f" for="inRetry">재도전 칸 (나와도 하트가 줄지 않아요)</label>
+    <select id="inRetry"></select>
+    <p class="hint" style="margin:6px 0 0">재도전은 참가자 한 명당 한 번만 나와요.</p>
+  </section>
+
+  <section class="block">
     <h2>당첨 문자 QR</h2>
     <p class="hint">QR 칸이 당첨되면 뜨는 QR이에요. <b>안내 페이지</b>로 하면 손님이 포스터와 수업시간을 바로 보고, 요일·부·아이 나이를 골라 신청 문자를 보내요.</p>
     <label class="f" for="inMode">QR을 찍으면</label>
@@ -290,7 +314,10 @@ button,.btn,.chip{-webkit-user-select:none;user-select:none;touch-action:manipul
         </div>
       </div>
     </div>
-    <div class="btn-area"><button class="spin-btn" id="spinBtn" type="button">돌리기</button></div>
+    <div class="btn-area">
+      <div class="lives" aria-live="polite"><span class="lives-label" id="livesLabel">남은 기회</span><span class="hearts" id="hearts"></span></div>
+      <button class="spin-btn" id="spinBtn" type="button">돌리기</button>
+    </div>
   </div>
 </div>
 
@@ -302,6 +329,7 @@ button,.btn,.chip{-webkit-user-select:none;user-select:none;touch-action:manipul
     <div class="modal-body">
       <p class="label" id="mLabel">당첨!</p>
       <div class="prize" id="mPrize"></div>
+      <p class="life-note" id="mLife"></p>
       <div id="mQrArea"></div>
       <button class="btn" type="button" id="mClose">닫기</button>
     </div>
@@ -350,17 +378,16 @@ button,.btn,.chip{-webkit-user-select:none;user-select:none;touch-action:manipul
 /* ---------- 기본값 ---------- */
 // 태권도 띠 색을 칸 색으로 사용
 var PALETTE=["#D62828","#F5C518","#1F5FBF","#2E9E4F","#F08A24","#6B3FA0","#1B1B1F","#F4F1E8","#3BA7E0","#E5568E","#7A4A2A","#23306B"];
-var STORE_KEY="jd-roulette-v2";
+var STORE_KEY="jd-roulette-v3";
 var DEFAULT={
   title:"정도2관 격파 이벤트",
   subtitle:"송판 격파 성공하면 룰렛 한 번!",
   items:[
-    {text:"1일 무료체험",qr:true,color:PALETTE[0]},
-    {text:"사탕 한 봉지",qr:false,color:PALETTE[1]},
-    {text:"한 번 더!",qr:false,color:PALETTE[2]},
-    {text:"도장 스티커",qr:false,color:PALETTE[3]},
-    {text:"1주 무료체험",qr:true,color:PALETTE[4]},
-    {text:"음료수",qr:false,color:PALETTE[5]}
+    {id:"i1",text:"3일 체험권",qr:true,color:PALETTE[0]},
+    {id:"i2",text:"사탕",qr:false,color:PALETTE[1]},
+    {id:"i3",text:"재도전",qr:false,color:PALETTE[2]},
+    {id:"i4",text:"멘토스",qr:false,color:PALETTE[3]},
+    {id:"i5",text:"초콜릿",qr:false,color:PALETTE[4]}
   ],
   phone:"01083345800",
   infoUrl:"https://yujongho0714.github.io/event/info.html",
@@ -368,7 +395,10 @@ var DEFAULT={
   qrMode:"page",
   notices:[{name:"무료체험 안내",body:"안녕하세요! 용인대 정도 태권도 2관입니다!\n격파 이벤트 무료체험 당첨을 축하드려요!\n\n-수업시간 안내-\n1부-1시30분~2시20분(초등부)\n2부-2시30분~3시20분(초등부)\n3부-3시30분~4시20분(유치부/초등부)\n4부-4시30분~5시20분(유치부/초등부)\n5부-5시30분~6시20분(유치부/초등부)\n6부-6시30분~8시(시범단/국기원심사반)\n장소-안성시 아양3로 45 4층 용인대 정도 태권도 2관\n(백성초 바로 옆! 야호분식/대단한 탕후루 건물 4층)\n\n-무료 체험 참여 방법-\n이 번호로 먼저 참여 일정관련(당일/예약방문)\n연락주시고 방문해주시면 감사하겠습니다!\n\n예)수요일 4시반부 체험수업 참여합니다.(여 7세/남 6세)"}],
   sound:true,
-  wheelScale:1
+  wheelScale:1,
+  lives:2,
+  guarId:"i1",
+  retryId:"i3"
 };
 
 function clone(o){return JSON.parse(JSON.stringify(o));}
@@ -380,6 +410,8 @@ function load(){
   return clone(DEFAULT);
 }
 var cfg=load();
+function uid(){ return "i"+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+cfg.items.forEach(function(it){ if(!it.id) it.id=uid(); });
 var saveTimer=null;
 function save(){ clearTimeout(saveTimer); saveTimer=setTimeout(function(){ try{localStorage.setItem(STORE_KEY,JSON.stringify(cfg));}catch(e){} },250); }
 
@@ -489,6 +521,15 @@ function drawBadge(g,x,y,sz){
 }
 
 /* ---------- 설정 화면 ---------- */
+function renderRuleSelects(){
+  [["inGuar","guarId","없음 (모두 무작위)"],["inRetry","retryId","없음"]].forEach(function(x){
+    var s=$(x[0]); s.innerHTML=""; var o=document.createElement("option"); o.value=""; o.textContent=x[2]; s.appendChild(o);
+    cfg.items.forEach(function(it,i){ var op=document.createElement("option"); op.value=it.id; op.textContent=(it.text||"").trim()||((i+1)+"번 칸"); s.appendChild(op); });
+    if(!cfg.items.some(function(it){return it.id===cfg[x[1]];})) cfg[x[1]]="";
+    s.value=cfg[x[1]]||"";
+  });
+  if(cfg.guarId&&cfg.guarId===cfg.retryId){ cfg.retryId=""; $("inRetry").value=""; }
+}
 function renderItems(){
   var list=$("itemList"); list.innerHTML="";
   cfg.items.forEach(function(it,idx){
@@ -517,10 +558,10 @@ $("addItem").addEventListener("click",function(){
   if(cfg.items.length>=12) return;
   var used=cfg.items.map(function(i){return i.color.toUpperCase();});
   var c=PALETTE.find(function(p){return used.indexOf(p.toUpperCase())<0;})||PALETTE[cfg.items.length%12];
-  cfg.items.push({text:"",qr:false,color:c}); renderItems(); changed();
+  cfg.items.push({id:uid(),text:"",qr:false,color:c}); renderItems(); changed();
   var inputs=$("itemList").querySelectorAll("input[type=text]"); if(inputs.length) inputs[inputs.length-1].focus();
 });
-function changed(){ save(); drawPreview(); }
+function changed(){ save(); drawPreview(); renderRuleSelects(); }
 function drawPreview(){ drawWheel($("preview"),200); $("preview").style.width="200px"; $("preview").style.height="200px"; }
 
 function bindField(id,key){ var el=$(id); el.value=cfg[key]; el.addEventListener("input",function(){cfg[key]=el.value; save();}); }
@@ -663,7 +704,7 @@ function openStage(){
   $("sTitle").textContent=cfg.title||""; $("sSub").textContent=cfg.subtitle||"";
   $("sSub").classList.toggle("hidden",!cfg.subtitle);
   $("setup").classList.add("hidden"); $("startBar").classList.add("hidden"); fadeShow($("stage"));
-  updateSoundBtn(); layoutStage();
+  updateSoundBtn(); newParticipant(); layoutStage();
 }
 function closeStage(){
   if(spinning) return;
@@ -685,13 +726,37 @@ window.addEventListener("resize",function(){ if(!$("stage").classList.contains("
 
 function flickPointer(){ var p=$("pointer"); p.classList.remove("flick"); void p.offsetWidth; p.classList.add("flick"); }
 
+var lives=0, gotGuar=false, retryUsed=false, turnInfo=null;
+var HEART='<svg class="heart" viewBox="0 0 24 22" aria-hidden="true"><path d="M12 20.5s-7.6-4.6-10-9.3C.4 8 2.2 3.8 6.1 3.8c2.2 0 3.6 1.2 4.6 2.6L12 8.2l1.3-1.8c1-1.4 2.4-2.6 4.6-2.6 3.9 0 5.7 4.2 4.1 7.4-2.4 4.7-10 9.3-10 9.3z"/></svg>';
+function renderHearts(mode,lostIndex){
+  var box=$("hearts"), max=cfg.lives||2; box.innerHTML="";
+  for(var i=0;i<max;i++){
+    box.insertAdjacentHTML("beforeend",HEART);
+    var hh=box.lastChild; if(i>=lives) hh.classList.add("empty");
+    if(mode==="pop"){ hh.classList.add("pop"); hh.style.animationDelay=(i*90)+"ms"; }
+    if(mode==="lose"&&i===lostIndex) hh.classList.add("lose");
+  }
+  $("hearts").setAttribute("aria-label","남은 기회 "+lives+"번");
+  $("livesLabel").textContent=lives>0?"남은 기회":"기회를 다 썼어요";
+}
+function updateSpinBtn(){ $("spinBtn").textContent=lives>0?"돌리기":"다음 참가자"; }
+function newParticipant(){ lives=cfg.lives||2; gotGuar=false; retryUsed=false; renderHearts("pop"); updateSpinBtn(); }
+function idxOf(id){ for(var i=0;i<cfg.items.length;i++) if(cfg.items[i].id===id) return i; return -1; }
+function pickTarget(){
+  var n=cfg.items.length, gi=cfg.guarId?idxOf(cfg.guarId):-1, ri=cfg.retryId?idxOf(cfg.retryId):-1;
+  if(gi>=0&&!gotGuar&&(lives<=1||Math.random()<1/lives)) return gi;
+  var pool=[]; for(var i=0;i<n;i++){ if(i===gi) continue; if(i===ri&&retryUsed) continue; pool.push(i); }
+  if(!pool.length) return gi>=0?gi:Math.floor(Math.random()*n);
+  return pool[Math.floor(Math.random()*pool.length)];
+}
 function spin(){
   if(spinning) return;
+  if(lives<=0){ newParticipant(); return; }
   ensureAudio();
   var n=cfg.items.length, s=360/n;
   spinning=true; $("spinBtn").disabled=true; $("hub").disabled=true;
   var w=$("wheel3d"); w.classList.remove("idle","win"); w.classList.add("spinning");
-  var target=Math.floor(Math.random()*n);
+  var target=pickTarget();
   var c=(target+0.5)*s+(Math.random()*0.7-0.35)*s;
   var cur=((rot%360)+360)%360, desired=((360-c)%360+360)%360, delta=((desired-cur)%360+360)%360;
   var turns=reduceMotion?2:(6+Math.floor(Math.random()*3));
@@ -711,15 +776,20 @@ function finish(){
   var n=cfg.items.length, s=360/n;
   var local=((-rot)%360+360)%360, idx=Math.min(n-1,Math.floor(local/s));
   var w=$("wheel3d"); w.classList.remove("spinning"); w.classList.add("win");
+  var it=cfg.items[idx], isRetry=!!cfg.retryId&&it.id===cfg.retryId;
+  if(isRetry){ retryUsed=true; turnInfo={retry:true}; }
+  else { var lost=lives-1; lives--; if(it.id===cfg.guarId) gotGuar=true; renderHearts("lose",lost); turnInfo={retry:false}; if(navigator.vibrate&&cfg.sound){ try{navigator.vibrate(60);}catch(e){} } }
   fanfare(); confetti();
-  setTimeout(function(){ showModal(cfg.items[idx],false); },700);
+  setTimeout(function(){ showModal(it,false); },700);
 }
 $("spinBtn").addEventListener("click",spin);
-$("hub").addEventListener("click",function(){ if(!spinning&&navigator.vibrate){ try{navigator.vibrate(20);}catch(e){} } spin(); });
+$("hub").addEventListener("click",function(){ if(lives<=0) return; if(!spinning&&navigator.vibrate){ try{navigator.vibrate(20);}catch(e){} } spin(); });
 
 function showModal(it,isTest){
   $("mBand").style.background=it.color;
-  $("mLabel").textContent=isTest?"QR 테스트":"당첨!";
+  var retry=!isTest&&turnInfo&&turnInfo.retry;
+  $("mLabel").textContent=isTest?"QR 테스트":(retry?"한 번 더!":"당첨!");
+  $("mLife").textContent=isTest?"":(retry?"하트가 줄지 않아요. 한 번 더 돌려요!":(lives>0?"남은 기회 "+lives+"번":"모든 기회를 다 썼어요. 참여해 줘서 고마워요!"));
   $("mPrize").textContent=(it.text||"").trim()||"(빈칸)";
   $("mPrize").style.color=luminance(it.color)>0.6?"#1b2033":it.color;
   if(it.qr||isTest) fillQrArea((it.text||"").trim()); else $("mQrArea").innerHTML="";
@@ -728,7 +798,7 @@ function showModal(it,isTest){
 }
 function closeModal(){
   fadeHide($("modal"));
-  if(spinning){ spinning=false; $("spinBtn").disabled=false; $("hub").disabled=false; var w=$("wheel3d"); w.classList.remove("win"); w.classList.add("idle"); }
+  if(spinning){ spinning=false; $("spinBtn").disabled=false; $("hub").disabled=false; var w=$("wheel3d"); w.classList.remove("win"); w.classList.add("idle"); updateSpinBtn(); }
 }
 $("mClose").addEventListener("click",closeModal);
 $("modal").addEventListener("click",function(e){ if(e.target===$("modal")) closeModal(); });
@@ -757,7 +827,11 @@ function confetti(){
 }
 
 /* ---------- 시작 ---------- */
-renderItems(); renderNotices(); buildRivets(); drawPreview();
+renderItems(); renderNotices(); buildRivets(); drawPreview(); renderRuleSelects();
+$("inLives").value=String(cfg.lives||2);
+$("inLives").addEventListener("change",function(){ cfg.lives=+$("inLives").value; save(); });
+$("inGuar").addEventListener("change",function(){ cfg.guarId=$("inGuar").value; if(cfg.guarId&&cfg.guarId===cfg.retryId){ cfg.retryId=""; $("inRetry").value=""; } save(); });
+$("inRetry").addEventListener("change",function(){ cfg.retryId=$("inRetry").value; if(cfg.retryId&&cfg.retryId===cfg.guarId){ toast("꼭 당첨될 칸과 같은 칸은 고를 수 없어요"); cfg.retryId=""; $("inRetry").value=""; } save(); });
 if(document.fonts&&document.fonts.load){
   document.fonts.load('40px "Black Han Sans"').then(function(){ drawPreview(); if(!$("stage").classList.contains("hidden")) layoutStage(); }).catch(function(){});
 }
