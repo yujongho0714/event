@@ -48,7 +48,7 @@ input:focus,textarea:focus,select:focus{border-color:#4d8bff;outline:none}
 @media (min-width:640px){.items-layout{grid-template-columns:1fr 210px;align-items:start}}
 .preview-box{display:flex;flex-direction:column;align-items:center;gap:6px;order:-1}
 @media (min-width:640px){.preview-box{order:0;position:sticky;top:16px}}
-.preview-box canvas{border-radius:50%;box-shadow:0 0 0 6px #b8891f,0 6px 18px rgba(0,0,0,.25)}
+.preview-box canvas{border-radius:50%;box-shadow:0 0 0 6px #24272d,0 6px 18px rgba(0,0,0,.25)}
 .preview-box small{color:var(--muted);font-size:12px}
 .count{font-family:var(--display);font-size:15px;color:var(--muted);float:right;font-weight:400}
 
@@ -80,61 +80,56 @@ input:focus,textarea:focus,select:focus{border-color:#4d8bff;outline:none}
 .start-bar button{display:block;width:100%;max-width:728px;margin:0 auto;padding:16px;border:0;border-radius:14px;background:var(--accent);color:#fff;font-family:var(--display);font-size:22px;box-shadow:0 5px 0 var(--accent-dark);cursor:pointer}
 .start-bar button:active{transform:translateY(3px);box-shadow:0 2px 0 var(--accent-dark)}
 
-/* ---------- 룰렛 무대 ---------- */
-#stage{position:fixed;inset:0;overflow:hidden;color:#fff;
-  background:radial-gradient(ellipse 80% 60% at 50% 32%,#3150a8 0%,#1a2a66 40%,#0a1233 75%,#050920 100%);
-  display:flex;flex-direction:column;align-items:center;
-  padding:calc(env(safe-area-inset-top,0px) + 10px) 12px calc(env(safe-area-inset-bottom,0px) + 14px)}
-#stage::before{content:"";position:absolute;inset:0;pointer-events:none;
-  background:repeating-conic-gradient(from 0deg at 50% 38%,rgba(255,255,255,.035) 0 6deg,transparent 6deg 18deg)}
-.stage-tools{position:absolute;top:calc(env(safe-area-inset-top,0px) + 10px);left:10px;right:10px;display:flex;justify-content:space-between;z-index:5}
-.stage-tools div{display:flex;gap:8px}
-.tool{height:40px;min-width:40px;padding:0 12px;border-radius:999px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;font-size:14px;font-weight:700;cursor:pointer;backdrop-filter:blur(4px)}
-.stage-title{position:relative;z-index:2;text-align:center;margin-top:46px;padding:0 8px}
-.stage-title h1{margin:0;font-family:var(--display);font-weight:400;font-size:clamp(30px,7.5vw,72px);line-height:1.1;color:#ffd65a;
-  text-shadow:0 3px 0 #9a6400,0 6px 0 #5c3a00,0 12px 28px rgba(0,0,0,.55);letter-spacing:1px;word-break:keep-all}
-.stage-title p{margin:8px 0 0;font-size:clamp(14px,3.6vw,22px);font-weight:500;color:rgba(255,255,255,.85);word-break:keep-all}
-.wheel-zone{position:relative;flex:1;width:100%;display:flex;align-items:center;justify-content:center;min-height:0}
-.floor{position:absolute;left:50%;transform:translateX(-50%);border-radius:50%;background:radial-gradient(ellipse at center,rgba(0,0,0,.6),rgba(0,0,0,0) 70%)}
-.wheel-3d{position:relative;transform:perspective(1500px) rotateX(14deg);transform-style:preserve-3d}
-.depth{position:absolute;inset:0;border-radius:50%;transform:translateY(3.4%);
-  background:linear-gradient(180deg,#9a6e14,#4a3205 70%,#2a1c02);box-shadow:0 18px 40px rgba(0,0,0,.6)}
+/* ---------- 룰렛 무대 (포스터 스타일) ---------- */
+#stage{position:fixed;inset:0;overflow:hidden;background:#ffffff;color:#111;display:flex;flex-direction:column;
+  padding:calc(env(safe-area-inset-top,0px) + 8px) 14px calc(env(safe-area-inset-bottom,0px) + 12px)}
+.stage-tools{display:flex;justify-content:space-between;align-items:center;gap:8px;flex:0 0 auto}
+.stage-tools div{display:flex;gap:6px;align-items:center}
+.tool{height:36px;min-width:36px;padding:0 12px;border-radius:8px;border:1.5px solid #d4d6dc;background:#fff;color:#222;font-size:14px;font-weight:700;cursor:pointer}
+.size-val{font-size:13px;font-weight:700;color:#666;min-width:44px;text-align:center}
+.stage-main{flex:1;min-height:0;display:grid;gap:10px 28px}
+#stage.portrait .stage-main{grid-template-areas:"title" "wheel" "btn";grid-template-rows:auto auto auto;grid-template-columns:minmax(0,1fr);align-content:center;gap:14px}
+#stage.landscape .stage-main{grid-template-areas:"title wheel" "btn wheel";grid-template-columns:minmax(200px,30%) minmax(0,1fr);grid-template-rows:1fr 1fr}
+.stage-title{grid-area:title;min-width:0}
+#stage.portrait .stage-title{text-align:center;padding-top:4px}
+#stage.landscape .stage-title{align-self:end;padding-left:8px}
+.stage-title h1{margin:0;font-family:var(--display);font-weight:400;font-size:clamp(30px,7vw,64px);line-height:1.12;color:#111;word-break:keep-all}
+#stage.landscape .stage-title h1{font-size:clamp(28px,4.4vw,60px)}
+.title-bar{display:flex;height:7px;width:120px;margin:12px 0 0}
+#stage.portrait .title-bar{margin:10px auto 0}
+.title-bar i{flex:1}
+.title-bar i:first-child{background:#d62828}
+.title-bar i:last-child{background:#1f4fbf}
+.stage-title p{margin:12px 0 0;font-size:clamp(15px,2.6vw,22px);font-weight:700;color:#444;word-break:keep-all;line-height:1.45}
+.btn-area{grid-area:btn;display:flex;justify-content:center}
+#stage.landscape .btn-area{align-self:start;justify-content:flex-start;padding-left:8px}
+.wheel-zone{grid-area:wheel;position:relative;display:flex;align-items:center;justify-content:center;min-height:0;min-width:0}
+.floor{position:absolute;left:50%;transform:translateX(-50%);border-radius:50%;background:radial-gradient(ellipse at center,rgba(0,0,0,.22),rgba(0,0,0,0) 70%)}
+.wheel-3d{position:relative;transform:perspective(1600px) rotateX(9deg)}
+.depth{position:absolute;inset:0;border-radius:50%;transform:translateY(2.6%);background:linear-gradient(180deg,#3a3d44,#111 80%);box-shadow:0 14px 26px rgba(0,0,0,.28)}
 .rim{position:absolute;inset:0;border-radius:50%;
-  background:radial-gradient(circle at 34% 24%,#fff4c8 0%,#efc458 16%,#c08a1f 42%,#80590c 72%,#4a3205 100%);
-  box-shadow:inset 0 3px 4px rgba(255,255,255,.55),inset 0 -6px 10px rgba(0,0,0,.45)}
-.face{position:absolute;inset:7%;border-radius:50%;overflow:hidden;
-  box-shadow:0 0 0 3px #3a2603,0 0 0 6px #f0c85c,0 0 0 8px #5a3d06}
+  background:radial-gradient(circle at 34% 24%,#8d929c 0%,#4a4e57 30%,#24272d 65%,#121316 100%);
+  box-shadow:inset 0 2px 3px rgba(255,255,255,.35),inset 0 -5px 8px rgba(0,0,0,.5)}
+.face{position:absolute;inset:6%;border-radius:50%;overflow:hidden;box-shadow:0 0 0 3px #fff,0 0 0 5px #111}
 .face canvas{display:block;width:100%;height:100%;will-change:transform}
-.gloss{position:absolute;inset:7%;border-radius:50%;pointer-events:none;
-  background:radial-gradient(ellipse 60% 45% at 32% 22%,rgba(255,255,255,.32),rgba(255,255,255,0) 70%),
-             radial-gradient(circle at 50% 50%,rgba(0,0,0,0) 62%,rgba(0,0,0,.28) 100%)}
-.bulb{position:absolute;width:3.4%;height:3.4%;margin:-1.7% 0 0 -1.7%;border-radius:50%;
-  background:radial-gradient(circle at 35% 35%,#fff 0%,#fff1b8 35%,#f2b733 75%,#a8700c 100%);
-  box-shadow:0 0 6px 2px rgba(255,214,90,.75),inset 0 -1px 2px rgba(0,0,0,.3)}
-.wheel-3d.idle .bulb:nth-child(odd){animation:twinkle 1.6s ease-in-out infinite}
-.wheel-3d.idle .bulb:nth-child(even){animation:twinkle 1.6s ease-in-out .8s infinite}
-.wheel-3d.spinning .bulb{animation:chase .5s linear infinite;animation-delay:calc(var(--i) * -.025s)}
-.wheel-3d.win .bulb{animation:winblink .28s steps(2,end) infinite}
-@keyframes twinkle{0%,100%{filter:brightness(1)}50%{filter:brightness(.45) saturate(.6);box-shadow:none}}
-@keyframes chase{0%,60%{filter:brightness(.4) saturate(.6);box-shadow:none}61%,100%{filter:brightness(1.2)}}
-@keyframes winblink{0%{filter:brightness(1.35)}100%{filter:brightness(.35);box-shadow:none}}
-.hub{position:absolute;left:50%;top:50%;width:21%;height:21%;transform:translate(-50%,-50%);border-radius:50%;border:0;cursor:pointer;padding:0;
-  background:radial-gradient(circle at 34% 28%,#fff7d6 0%,#ecbf4f 30%,#a3740f 70%,#5a3d06 100%);
-  box-shadow:0 6px 12px rgba(0,0,0,.55),inset 0 -4px 8px rgba(0,0,0,.4),inset 0 3px 4px rgba(255,255,255,.6)}
-.hub span{position:absolute;inset:16%;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  background:radial-gradient(circle at 38% 30%,#ff6b6b 0%,#d62828 45%,#7d1010 100%);
-  box-shadow:inset 0 -3px 6px rgba(0,0,0,.45),inset 0 2px 3px rgba(255,255,255,.45);
-  font-family:var(--display);color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.35)}
+.gloss{position:absolute;inset:6%;border-radius:50%;pointer-events:none;
+  background:radial-gradient(ellipse 55% 40% at 30% 20%,rgba(255,255,255,.22),rgba(255,255,255,0) 70%),
+             radial-gradient(circle at 50% 50%,rgba(0,0,0,0) 64%,rgba(0,0,0,.18) 100%)}
+.rivet{position:absolute;width:2.2%;height:2.2%;margin:-1.1% 0 0 -1.1%;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#ffffff 0%,#d3d6dc 40%,#7d828c 100%);box-shadow:0 1px 1px rgba(0,0,0,.6)}
+.hub{position:absolute;left:50%;top:50%;width:19%;height:19%;transform:translate(-50%,-50%);border-radius:50%;border:0;cursor:pointer;padding:0;background:#fff;
+  box-shadow:0 0 0 4px #111,0 6px 12px rgba(0,0,0,.35)}
+.hub svg{display:block;width:100%;height:100%;border-radius:50%;transition:transform .2s}
+.hub:active:not(:disabled) svg{transform:scale(.94)}
 .hub:disabled{cursor:default}
-.pointer{position:absolute;left:50%;top:-4.5%;width:10%;height:14%;transform:translateX(-50%);z-index:4;filter:drop-shadow(0 5px 4px rgba(0,0,0,.55))}
+.pointer{position:absolute;left:50%;top:-4%;width:9%;height:13%;transform:translateX(-50%);z-index:4;filter:drop-shadow(0 4px 3px rgba(0,0,0,.35))}
 .pointer svg{width:100%;height:100%;transform-origin:50% 31%;display:block}
 .pointer.flick svg{animation:flick .16s ease-out}
 @keyframes flick{0%{transform:rotate(0)}35%{transform:rotate(-24deg)}100%{transform:rotate(0)}}
-.spin-btn{position:relative;z-index:2;margin-top:10px;padding:14px 56px;border:0;border-radius:999px;cursor:pointer;
-  background:linear-gradient(180deg,#ff4d4d,#c81e1e);color:#fff;font-family:var(--display);font-size:clamp(22px,5vw,34px);letter-spacing:2px;
-  box-shadow:0 7px 0 #7d1010,0 14px 24px rgba(0,0,0,.45);text-shadow:0 2px 0 rgba(0,0,0,.3)}
-.spin-btn:active:not(:disabled){transform:translateY(4px);box-shadow:0 3px 0 #7d1010,0 8px 16px rgba(0,0,0,.4)}
-.spin-btn:disabled{filter:grayscale(.5) brightness(.8);cursor:default}
+.spin-btn{padding:14px 52px;border:0;border-radius:10px;cursor:pointer;background:#111;color:#fff;font-family:var(--display);font-size:clamp(22px,3.6vw,32px);letter-spacing:3px;box-shadow:0 6px 0 #d62828}
+.spin-btn:active:not(:disabled){transform:translateY(4px);box-shadow:0 2px 0 #d62828}
+.spin-btn.is-pressed{transform:translateY(4px) scale(.97)!important;box-shadow:0 2px 0 #d62828!important}
+.spin-btn:disabled{background:#777;box-shadow:0 6px 0 #aaa;cursor:default}
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:60}
 
 /* ---------- 결과 / QR 팝업 ---------- */
@@ -143,7 +138,7 @@ input:focus,textarea:focus,select:focus{border-color:#4d8bff;outline:none}
 @keyframes pop{0%{transform:scale(.6);opacity:0}100%{transform:scale(1);opacity:1}}
 .modal-band{height:16px;border-radius:22px 22px 0 0}
 .modal-body{padding:18px 20px 22px}
-.modal-body .label{font-family:var(--display);font-size:20px;color:#b07a10;margin:4px 0 0}
+.modal-body .label{font-family:var(--display);font-size:20px;color:#d62828;margin:4px 0 0}
 .modal-body .prize{font-family:var(--display);font-size:clamp(34px,10vw,52px);line-height:1.15;margin:6px 0 10px;word-break:keep-all}
 .qr-wrap{display:inline-block;padding:12px;background:#fff;border-radius:14px;border:3px solid #1b2033;margin:6px 0 10px}
 .qr-wrap canvas{display:block;width:min(240px,62vw);height:min(240px,62vw);image-rendering:pixelated}
@@ -153,8 +148,28 @@ input:focus,textarea:focus,select:focus{border-color:#4d8bff;outline:none}
 .modal-body .btn{width:100%;padding:14px;font-size:17px;background:#1b2033;color:#fff;border-color:#1b2033}
 
 @media (prefers-reduced-motion: reduce){
-  .wheel-3d .bulb{animation:none!important}
   .modal-card{animation:none}
+}
+/* ---------- 눌림(타격감) · 나타나기 ---------- */
+button,.btn,.chip{-webkit-user-select:none;user-select:none;touch-action:manipulation;transition:transform 140ms ease-out,box-shadow 140ms ease-out,filter 140ms ease-out}
+.is-pressed{transform:translateY(2px) scale(.95)!important;filter:brightness(.88);transition:transform 50ms ease-out,box-shadow 50ms ease-out,filter 50ms!important}
+.btn.red.is-pressed,.btn.main.is-pressed{box-shadow:0 1px 0 var(--red-dark,#8f1414)!important}
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .5s ease-out,transform .5s ease-out}
+.reveal.shown{opacity:1;transform:none}
+.fade-in{animation:fadeIn .24s ease-out both}
+.fade-out{animation:fadeOut .18s ease-in both}
+.fade-in > .sheet,.fade-in > .modal-card{animation:liftIn .28s ease-out both}
+.fade-out > .sheet,.fade-out > .modal-card{animation:dropOut .18s ease-in both}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes fadeOut{from{opacity:1}to{opacity:0}}
+@keyframes liftIn{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+@keyframes dropOut{from{opacity:1;transform:none}to{opacity:0;transform:translateY(16px)}}
+.pop-in{animation:popIn .32s ease-out both}
+@keyframes popIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){
+  .reveal{opacity:1;transform:none;transition:none}
+  .fade-in,.fade-out,.fade-in > *,.fade-out > *,.pop-in{animation:none!important}
+  .is-pressed{transform:none!important}
 }
 </style>
 </head>
@@ -237,44 +252,46 @@ input:focus,textarea:focus,select:focus{border-color:#4d8bff;outline:none}
 <div class="start-bar" id="startBar"><button type="button" id="startBtn">룰렛 시작</button></div>
 
 <!-- ============ 룰렛 무대 ============ -->
-<div id="stage" class="hidden">
+<div id="stage" class="hidden portrait">
   <div class="stage-tools">
     <div><button class="tool" id="backBtn" type="button">설정</button></div>
     <div>
-      <button class="tool" id="soundBtn" type="button" aria-label="소리">소리 켬</button>
+      <button class="tool" id="sizeDown" type="button" aria-label="룰렛 작게">−</button>
+      <span class="size-val" id="sizeVal">100%</span>
+      <button class="tool" id="sizeUp" type="button" aria-label="룰렛 크게">+</button>
+      <button class="tool" id="soundBtn" type="button">소리 켬</button>
       <button class="tool" id="fsBtn" type="button">전체화면</button>
     </div>
   </div>
-  <div class="stage-title">
-    <h1 id="sTitle"></h1>
-    <p id="sSub"></p>
-  </div>
-  <div class="wheel-zone" id="zone">
-    <div class="floor" id="floor"></div>
-    <div class="wheel-3d idle" id="wheel3d">
-      <div class="depth"></div>
-      <div class="rim" id="rim"></div>
-      <div class="face"><canvas id="wheel"></canvas></div>
-      <div class="gloss"></div>
-      <button class="hub" id="hub" type="button" aria-label="룰렛 돌리기"><span id="hubText">GO</span></button>
-      <div class="pointer" id="pointer">
-        <svg viewBox="0 0 60 84" aria-hidden="true">
-          <defs>
-            <linearGradient id="pg" x1="0" x2="1" y1="0" y2="1">
-              <stop offset="0" stop-color="#ff7a7a"/><stop offset=".5" stop-color="#d62828"/><stop offset="1" stop-color="#7d1010"/>
-            </linearGradient>
-            <radialGradient id="rv" cx=".35" cy=".3" r=".8">
-              <stop offset="0" stop-color="#fff7d6"/><stop offset=".45" stop-color="#e8b947"/><stop offset="1" stop-color="#6b4a0b"/>
-            </radialGradient>
-          </defs>
-          <path d="M30 82 C23 62 5 44 5 26 A25 25 0 1 1 55 26 C55 44 37 62 30 82 Z" fill="url(#pg)" stroke="#f0c85c" stroke-width="3.5"/>
-          <path d="M14 18 A18 18 0 0 1 30 8" stroke="rgba(255,255,255,.55)" stroke-width="4" fill="none" stroke-linecap="round"/>
-          <circle cx="30" cy="26" r="9" fill="url(#rv)" stroke="#5a3d06" stroke-width="1.5"/>
-        </svg>
+  <div class="stage-main">
+    <div class="stage-title">
+      <h1 id="sTitle"></h1>
+      <div class="title-bar" aria-hidden="true"><i></i><i></i></div>
+      <p id="sSub"></p>
+    </div>
+    <div class="wheel-zone" id="zone">
+      <div class="floor" id="floor"></div>
+      <div class="wheel-3d" id="wheel3d">
+        <div class="depth"></div>
+        <div class="rim" id="rim"></div>
+        <div class="face"><canvas id="wheel"></canvas></div>
+        <div class="gloss"></div>
+        <button class="hub no-press" id="hub" type="button" aria-label="룰렛 돌리기">
+          <svg viewBox="0 0 100 100" aria-hidden="true">
+            <circle cx="50" cy="50" r="50" fill="#1f4fbf"/>
+            <path d="M0,50 A50,50 0 0 1 100,50 A25,25 0 0 1 50,50 A25,25 0 0 0 0,50 Z" fill="#d62828"/>
+          </svg>
+        </button>
+        <div class="pointer" id="pointer">
+          <svg viewBox="0 0 60 84" aria-hidden="true">
+            <path d="M30 82 C23 62 5 44 5 26 A25 25 0 1 1 55 26 C55 44 37 62 30 82 Z" fill="#d62828" stroke="#111" stroke-width="3.5"/>
+            <circle cx="30" cy="26" r="9" fill="#e9ebef" stroke="#111" stroke-width="2"/>
+          </svg>
+        </div>
       </div>
     </div>
+    <div class="btn-area"><button class="spin-btn" id="spinBtn" type="button">돌리기</button></div>
   </div>
-  <button class="spin-btn" id="spinBtn" type="button">돌리기</button>
 </div>
 
 <canvas id="confetti"></canvas>
@@ -292,6 +309,40 @@ input:focus,textarea:focus,select:focus{border-color:#4d8bff;outline:none}
 </div>
 <div class="toast" id="toast"></div>
 
+<script>
+/* 눌림(타격감) · 페이드 공통 */
+(function(){
+  var reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var SEL="button:not(.no-press),.btn,.chip";
+  document.addEventListener("pointerdown",function(e){
+    var b=e.target.closest&&e.target.closest(SEL); if(!b||b.disabled) return;
+    b.classList.add("is-pressed"); var t=Date.now();
+    var up=function(){ window.removeEventListener("pointerup",up); window.removeEventListener("pointercancel",up);
+      setTimeout(function(){ b.classList.remove("is-pressed"); },Math.max(0,110-(Date.now()-t))); };
+    window.addEventListener("pointerup",up); window.addEventListener("pointercancel",up);
+  },{passive:true});
+  document.addEventListener("click",function(e){
+    var b=e.target.closest&&e.target.closest(SEL); if(!b||b.disabled) return;
+    if(navigator.vibrate){ try{ navigator.vibrate(15); }catch(_){} }
+  },true);
+  window.fadeShow=function(el){
+    el.classList.remove("hidden","fade-out");
+    if(!reduce){ el.classList.remove("fade-in"); void el.offsetWidth; el.classList.add("fade-in"); }
+  };
+  window.fadeHide=function(el,cb){
+    if(reduce||el.classList.contains("hidden")){ el.classList.add("hidden"); if(cb) cb(); return; }
+    el.classList.remove("fade-in"); el.classList.add("fade-out");
+    setTimeout(function(){ el.classList.add("hidden"); el.classList.remove("fade-out"); if(cb) cb(); },180);
+  };
+  window.setupReveal=function(){
+    var els=document.querySelectorAll(".reveal:not(.shown)");
+    if(reduce||!("IntersectionObserver" in window)){ els.forEach(function(x){x.classList.add("shown");}); return; }
+    var io=new IntersectionObserver(function(es){ es.forEach(function(en){ if(en.isIntersecting){ en.target.classList.add("shown"); io.unobserve(en.target); } }); },{threshold:.1,rootMargin:"0px 0px -40px 0px"});
+    els.forEach(function(x){ io.observe(x); });
+  };
+  document.addEventListener("DOMContentLoaded",function(){ window.setupReveal(); });
+})();
+</script>
 <script>
 (function(){
 "use strict";
@@ -316,7 +367,8 @@ var DEFAULT={
   smsTpl:"[{제목}] {경품} 당첨! 안내문 받고 싶어요. 아이 이름: ",
   qrMode:"page",
   notices:[{name:"무료체험 안내",body:"안녕하세요! 용인대 정도 태권도 2관입니다!\n격파 이벤트 무료체험 당첨을 축하드려요!\n\n-수업시간 안내-\n1부-1시30분~2시20분(초등부)\n2부-2시30분~3시20분(초등부)\n3부-3시30분~4시20분(유치부/초등부)\n4부-4시30분~5시20분(유치부/초등부)\n5부-5시30분~6시20분(유치부/초등부)\n6부-6시30분~8시(시범단/국기원심사반)\n장소-안성시 아양3로 45 4층 용인대 정도 태권도 2관\n(백성초 바로 옆! 야호분식/대단한 탕후루 건물 4층)\n\n-무료 체험 참여 방법-\n이 번호로 먼저 참여 일정관련(당일/예약방문)\n연락주시고 방문해주시면 감사하겠습니다!\n\n예)수요일 4시반부 체험수업 참여합니다.(여 7세/남 6세)"}],
-  sound:true
+  sound:true,
+  wheelScale:1
 };
 
 function clone(o){return JSON.parse(JSON.stringify(o));}
@@ -371,8 +423,8 @@ function drawWheel(cv,css){
   for(i=0;i<n;i++){
     a0=-Math.PI/2+i*s;
     g.beginPath(); g.moveTo(0,0); g.lineTo(Math.cos(a0)*R,Math.sin(a0)*R);
-    g.lineWidth=Math.max(2,R*.016); g.strokeStyle="#5a3d06"; g.stroke();
-    g.lineWidth=Math.max(1,R*.008); g.strokeStyle="#f3cf6a"; g.stroke();
+    g.lineWidth=Math.max(2,R*.014); g.strokeStyle="rgba(0,0,0,.35)"; g.stroke();
+    g.lineWidth=Math.max(1,R*.007); g.strokeStyle="#ffffff"; g.stroke();
   }
   // 글자
   var maxR=R*.86, minR=R*.29;
@@ -417,10 +469,10 @@ function drawWheel(cv,css){
     a0=-Math.PI/2+i*s;
     var px2=Math.cos(a0)*R*.935, py2=Math.sin(a0)*R*.935, pr=Math.max(3,R*.026);
     var pg=g.createRadialGradient(px2-pr*.35,py2-pr*.35,pr*.1,px2,py2,pr);
-    pg.addColorStop(0,"#fff8dc"); pg.addColorStop(.45,"#e7b947"); pg.addColorStop(1,"#5a3d06");
+    pg.addColorStop(0,"#ffffff"); pg.addColorStop(.45,"#cfd2d8"); pg.addColorStop(1,"#4a4e57");
     g.beginPath(); g.arc(px2,py2,pr,0,Math.PI*2); g.fillStyle=pg; g.fill();
   }
-  g.beginPath(); g.arc(0,0,R-1,0,Math.PI*2); g.lineWidth=2; g.strokeStyle="rgba(58,38,3,.8)"; g.stroke();
+  g.beginPath(); g.arc(0,0,R-1,0,Math.PI*2); g.lineWidth=2; g.strokeStyle="rgba(0,0,0,.6)"; g.stroke();
   g.restore();
 }
 function drawBadge(g,x,y,sz){
@@ -564,43 +616,58 @@ function tone(freq,dur,type,vol,when){
   gn.gain.setValueAtTime(0.0001,t); gn.gain.exponentialRampToValueAtTime(vol||0.2,t+0.005); gn.gain.exponentialRampToValueAtTime(0.0001,t+dur);
   o.connect(gn); gn.connect(actx.destination); o.start(t); o.stop(t+dur+0.02);
 }
-function tickSound(){ var now=performance.now(); if(now-lastTick<38) return; lastTick=now; tone(1700+Math.random()*300,0.035,"square",0.06); tone(420,0.05,"triangle",0.08); }
-function fanfare(){ [523,659,784,1047].forEach(function(f,i){ tone(f,0.28,"triangle",0.22,i*0.12); }); tone(1047,0.7,"sine",0.18,0.5); tone(1319,0.7,"sine",0.12,0.5); }
+function tickSound(){ var now=performance.now(); if(now-lastTick<38) return; lastTick=now; if(cfg.sound&&navigator.vibrate){ try{navigator.vibrate(6);}catch(e){} } tone(1700+Math.random()*300,0.035,"square",0.06); tone(420,0.05,"triangle",0.08); }
+function fanfare(){ if(cfg.sound&&navigator.vibrate){ try{navigator.vibrate([40,60,40,60,120]);}catch(e){} } [523,659,784,1047].forEach(function(f,i){ tone(f,0.28,"triangle",0.22,i*0.12); }); tone(1047,0.7,"sine",0.18,0.5); tone(1319,0.7,"sine",0.12,0.5); }
 function updateSoundBtn(){ $("soundBtn").textContent=cfg.sound?"소리 켬":"소리 끔"; }
 $("soundBtn").addEventListener("click",function(){ cfg.sound=!cfg.sound; updateSoundBtn(); save(); ensureAudio(); });
 
 /* ---------- 무대 ---------- */
 var reduceMotion=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
 var rot=0, spinning=false, S=300;
-function buildBulbs(){
-  var w=$("wheel3d"); w.querySelectorAll(".bulb").forEach(function(b){b.remove();});
-  var N=24;
+function buildRivets(){
+  var w=$("wheel3d"); w.querySelectorAll(".rivet").forEach(function(b){b.remove();});
+  var N=16;
   for(var i=0;i<N;i++){
-    var a=i/N*Math.PI*2-Math.PI/2, b=document.createElement("span"); b.className="bulb";
-    b.style.left=(50+Math.cos(a)*46.6)+"%"; b.style.top=(50+Math.sin(a)*46.6)+"%"; b.style.setProperty("--i",i);
+    var a=i/N*Math.PI*2-Math.PI/2+Math.PI/N, b=document.createElement("span"); b.className="rivet";
+    b.style.left=(50+Math.cos(a)*47)+"%"; b.style.top=(50+Math.sin(a)*47)+"%";
     w.insertBefore(b,$("rim").nextSibling);
   }
 }
 function layoutStage(){
-  var zone=$("zone"); var zw=zone.clientWidth, zh=zone.clientHeight;
-  S=Math.floor(Math.max(200,Math.min(zw*0.94,zh*0.92,760)));
-  var w=$("wheel3d"); w.style.width=S+"px"; w.style.height=S+"px";
-  var fl=$("floor"); fl.style.width=(S*1.1)+"px"; fl.style.height=(S*0.22)+"px"; fl.style.top="calc(50% + "+(S*0.40)+"px)";
-  $("hubText").style.fontSize=(S*0.05)+"px";
-  drawWheel($("wheel"),S*0.86);
+  var st=$("stage"), land=innerWidth/innerHeight>0.95;
+  st.classList.toggle("landscape",land); st.classList.toggle("portrait",!land);
+  var w=$("wheel3d"); w.style.width="0px"; w.style.height="0px";
+  var zone=$("zone"), zw, zh;
+  if(land){ zone.style.height=""; zw=zone.clientWidth; zh=zone.clientHeight; }
+  else {
+    zone.style.height="0px";
+    var main=document.querySelector(".stage-main");
+    zw=main.clientWidth; zh=main.clientHeight-document.querySelector(".stage-title").offsetHeight-document.querySelector(".btn-area").offsetHeight-28;
+  }
+  var sc=cfg.wheelScale||1;
+  S=Math.floor(Math.max(180,Math.min(zw*0.98,zh/1.08)*sc));
+  w.style.width=S+"px"; w.style.height=S+"px";
+  if(!land) zone.style.height=Math.ceil(S*1.08)+"px";
+  var fl=$("floor"); fl.style.width=(S*1.05)+"px"; fl.style.height=(S*0.16)+"px"; fl.style.top="calc(50% + "+(S*0.44)+"px)";
+  drawWheel($("wheel"),S*0.88);
   $("wheel").style.width=""; $("wheel").style.height="";
   $("wheel").style.transform="rotate("+rot+"deg)";
+  $("sizeVal").textContent=Math.round(sc*100)+"%";
+  $("sizeUp").disabled=sc>=1; $("sizeDown").disabled=sc<=0.6;
 }
+function setScale(d){ var v=Math.round(((cfg.wheelScale||1)+d)*10)/10; cfg.wheelScale=Math.min(1,Math.max(0.6,v)); save(); layoutStage(); }
+$("sizeUp").addEventListener("click",function(){setScale(0.1);});
+$("sizeDown").addEventListener("click",function(){setScale(-0.1);});
 function openStage(){
   if(cfg.items.length<2){ toast("칸을 2개 이상 만들어 주세요"); return; }
   $("sTitle").textContent=cfg.title||""; $("sSub").textContent=cfg.subtitle||"";
   $("sSub").classList.toggle("hidden",!cfg.subtitle);
-  $("setup").classList.add("hidden"); $("startBar").classList.add("hidden"); $("stage").classList.remove("hidden");
+  $("setup").classList.add("hidden"); $("startBar").classList.add("hidden"); fadeShow($("stage"));
   updateSoundBtn(); layoutStage();
 }
 function closeStage(){
   if(spinning) return;
-  $("stage").classList.add("hidden"); $("setup").classList.remove("hidden"); $("startBar").classList.remove("hidden");
+  $("stage").classList.add("hidden"); fadeShow($("setup")); $("startBar").classList.remove("hidden");
   drawPreview();
 }
 $("startBtn").addEventListener("click",function(){ ensureAudio(); openStage(); });
@@ -648,7 +715,7 @@ function finish(){
   setTimeout(function(){ showModal(cfg.items[idx],false); },700);
 }
 $("spinBtn").addEventListener("click",spin);
-$("hub").addEventListener("click",spin);
+$("hub").addEventListener("click",function(){ if(!spinning&&navigator.vibrate){ try{navigator.vibrate(20);}catch(e){} } spin(); });
 
 function showModal(it,isTest){
   $("mBand").style.background=it.color;
@@ -656,11 +723,11 @@ function showModal(it,isTest){
   $("mPrize").textContent=(it.text||"").trim()||"(빈칸)";
   $("mPrize").style.color=luminance(it.color)>0.6?"#1b2033":it.color;
   if(it.qr||isTest) fillQrArea((it.text||"").trim()); else $("mQrArea").innerHTML="";
-  $("modal").classList.remove("hidden");
+  fadeShow($("modal"));
   $("mClose").focus();
 }
 function closeModal(){
-  $("modal").classList.add("hidden");
+  fadeHide($("modal"));
   if(spinning){ spinning=false; $("spinBtn").disabled=false; $("hub").disabled=false; var w=$("wheel3d"); w.classList.remove("win"); w.classList.add("idle"); }
 }
 $("mClose").addEventListener("click",closeModal);
@@ -690,7 +757,7 @@ function confetti(){
 }
 
 /* ---------- 시작 ---------- */
-renderItems(); renderNotices(); buildBulbs(); drawPreview();
+renderItems(); renderNotices(); buildRivets(); drawPreview();
 if(document.fonts&&document.fonts.load){
   document.fonts.load('40px "Black Han Sans"').then(function(){ drawPreview(); if(!$("stage").classList.contains("hidden")) layoutStage(); }).catch(function(){});
 }
