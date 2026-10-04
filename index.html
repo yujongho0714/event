@@ -77,6 +77,16 @@ input:focus,textarea:focus,select:focus{border-color:#4d8bff;outline:none}
 .toast.show{opacity:1}
 
 .start-bar{position:fixed;left:0;right:0;bottom:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));background:linear-gradient(to top,var(--paper) 70%,transparent);z-index:20}
+.start-row{display:flex;gap:10px;max-width:728px;margin:0 auto}
+.start-row #startBtn{flex:1.6}
+.start-bar .save-btn{flex:1;background:#fff;color:var(--ink);border:2.5px solid var(--ink);box-shadow:0 5px 0 var(--ink)}
+.start-bar .save-btn:active{box-shadow:0 2px 0 var(--ink)}
+.save-done{position:fixed;inset:0;z-index:95;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.save-done div{background:#111216;color:#fff;border-radius:14px;padding:22px 28px;text-align:center;box-shadow:0 14px 40px rgba(0,0,0,.4)}
+.save-done b{display:block;font-family:var(--display);font-weight:400;font-size:28px;color:#ffd65a}
+.save-done span{font-size:15px;color:rgba(255,255,255,.85)}
+.login-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:-6px 0 16px;font-size:14px;color:var(--muted)}
+.login-row button{border:1.5px solid var(--line);background:var(--card);border-radius:8px;padding:8px 12px;font-weight:700;cursor:pointer}
 .start-bar button{display:block;width:100%;max-width:728px;margin:0 auto;padding:16px;border:0;border-radius:14px;background:var(--accent);color:#fff;font-family:var(--display);font-size:22px;box-shadow:0 5px 0 var(--accent-dark);cursor:pointer}
 .start-bar button:active{transform:translateY(3px);box-shadow:0 2px 0 var(--accent-dark)}
 
@@ -191,8 +201,9 @@ button,.btn,.chip{-webkit-user-select:none;user-select:none;touch-action:manipul
 <main id="setup">
   <div class="setup-head">
     <h1>룰렛 만들기</h1>
-    <p>제목과 칸 내용을 정하고 아래 <b>룰렛 시작</b>을 누르세요. 입력한 내용은 이 기기에 자동 저장돼요.</p>
+    <p>제목과 칸 내용을 정하고 아래 <b>설정 저장</b>을 누른 뒤 <b>룰렛 시작</b>을 누르세요.</p>
   </div>
+  <div class="login-row"><span id="loginState">관리자로 로그인하고 저장하면 다른 폰과 태블릿에서도 같은 설정이 열려요.</span><button type="button" id="rLogin">관리자 로그인</button></div>
 
   <section class="block">
     <h2>룰렛 화면</h2>
@@ -273,7 +284,8 @@ button,.btn,.chip{-webkit-user-select:none;user-select:none;touch-action:manipul
     </div>
   </section>
 </main>
-<div class="start-bar" id="startBar"><button type="button" id="startBtn">룰렛 시작</button></div>
+<div class="start-bar" id="startBar"><div class="start-row"><button type="button" id="saveBtn" class="save-btn">설정 저장</button><button type="button" id="startBtn">룰렛 시작</button></div></div>
+<div class="save-done hidden" id="saveDone"><div><b>저장되었습니다</b><span id="saveDoneMsg">다음에 켜도 그대로예요</span></div></div>
 
 <!-- ============ 룰렛 무대 ============ -->
 <div id="stage" class="hidden portrait">
@@ -405,7 +417,7 @@ function clone(o){return JSON.parse(JSON.stringify(o));}
 function load(){
   try{
     var raw=localStorage.getItem(STORE_KEY);
-    if(raw){var c=JSON.parse(raw); var d=clone(DEFAULT); for(var k in d){ if(c[k]!==undefined) d[k]=c[k]; } if(Array.isArray(d.items)&&d.items.length>=2) return d; }
+    if(raw){var c=JSON.parse(raw); var d=clone(DEFAULT); for(var k in d){ if(c[k]!==undefined) d[k]=c[k]; } d.savedAt=c.savedAt||0; if(Array.isArray(d.items)&&d.items.length>=2) return d; }
   }catch(e){}
   return clone(DEFAULT);
 }
@@ -413,7 +425,8 @@ var cfg=load();
 function uid(){ return "i"+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
 cfg.items.forEach(function(it){ if(!it.id) it.id=uid(); });
 var saveTimer=null;
-function save(){ clearTimeout(saveTimer); saveTimer=setTimeout(function(){ try{localStorage.setItem(STORE_KEY,JSON.stringify(cfg));}catch(e){} },250); }
+function save(){ clearTimeout(saveTimer); saveTimer=setTimeout(saveLocal,250); }
+function saveLocal(){ try{localStorage.setItem(STORE_KEY,JSON.stringify(cfg));}catch(e){} }
 
 var $=function(id){return document.getElementById(id);};
 function toast(msg){var t=$("toast");t.textContent=msg;t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove("show");},1800);}
@@ -712,6 +725,52 @@ function closeStage(){
   drawPreview();
 }
 $("startBtn").addEventListener("click",function(){ ensureAudio(); openStage(); });
+
+/* ---------- 저장 · 여러 기기 같이 쓰기 ---------- */
+var FB_CFG={apiKey:"AIzaSyBhQaR8YuG4CovQgFBaPKd2nZSO7ZjP0PY",authDomain:"taekwondo-wordgame.firebaseapp.com",databaseURL:"https://taekwondo-wordgame-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"taekwondo-wordgame",appId:"1:376591184218:web:d4a4ee50773e787e300363"};
+var fdb=null, fauth=null, fuser=null;
+function showSaved(msg){ var d=$("saveDone"); $("saveDoneMsg").textContent=msg; fadeShow(d); clearTimeout(d._t); d._t=setTimeout(function(){ fadeHide(d); },1700); }
+function refreshSetup(){
+  $("inTitle").value=cfg.title||""; $("inSub").value=cfg.subtitle||""; $("inPhone").value=cfg.phone||""; $("inTpl").value=cfg.smsTpl||""; $("inUrl").value=cfg.infoUrl||"";
+  $("inMode").value=cfg.qrMode; modeFields(); $("inLives").value=String(cfg.lives||2);
+  cfg.items.forEach(function(it){ if(!it.id) it.id=uid(); });
+  renderItems(); renderNotices(); renderRuleSelects(); drawPreview();
+}
+$("saveBtn").addEventListener("click",function(){
+  cfg.savedAt=Date.now(); clearTimeout(saveTimer); saveLocal();
+  if(fdb&&fuser){
+    fdb.ref("site/roulette").set(JSON.parse(JSON.stringify(cfg)))
+      .then(function(){ showSaved("모든 기기에 적용되었어요"); })
+      .catch(function(){ showSaved("이 기기에 저장되었어요"); toast("관리자 계정이 아니라서 다른 기기에는 저장되지 않았어요"); });
+  } else {
+    showSaved("이 기기에 저장되었어요. 다음에 켜도 그대로예요");
+  }
+});
+function loadScriptR(src){ return new Promise(function(res,rej){ var s=document.createElement("script"); s.src=src; s.onload=res; s.onerror=rej; document.head.appendChild(s); }); }
+var FBV="https://www.gstatic.com/firebasejs/10.12.2/";
+loadScriptR(FBV+"firebase-app-compat.js")
+  .then(function(){ return Promise.all([loadScriptR(FBV+"firebase-auth-compat.js"),loadScriptR(FBV+"firebase-database-compat.js")]); })
+  .then(function(){
+    firebase.initializeApp(FB_CFG); fdb=firebase.database(); fauth=firebase.auth();
+    fdb.ref("site/roulette").once("value").then(function(s){
+      var r=s.val(); if(!r||!Array.isArray(r.items)||r.items.length<2) return;
+      if((r.savedAt||0)<=(cfg.savedAt||0)) return;
+      var d=clone(DEFAULT); for(var k in d){ if(r[k]!==undefined) d[k]=r[k]; } d.savedAt=r.savedAt;
+      cfg=d; saveLocal(); refreshSetup(); toast("저장된 룰렛 설정을 불러왔어요");
+    }).catch(function(){});
+    fauth.onAuthStateChanged(function(u){
+      fuser=u;
+      $("loginState").textContent=u?(u.email+"로 로그인됨. 저장하면 모든 기기에 적용돼요."):"관리자로 로그인하고 저장하면 다른 폰과 태블릿에서도 같은 설정이 열려요.";
+      $("rLogin").textContent=u?"로그아웃":"관리자 로그인";
+    });
+  })
+  .catch(function(){ $("rLogin").classList.add("hidden"); $("loginState").textContent="이 화면에서는 이 기기에만 저장돼요."; });
+$("rLogin").addEventListener("click",function(){
+  if(!fauth) return;
+  if(fuser){ fauth.signOut(); return; }
+  var p=new firebase.auth.GoogleAuthProvider();
+  fauth.signInWithPopup(p).catch(function(e){ if(e&&(e.code==="auth/popup-blocked"||e.code==="auth/operation-not-supported-in-this-environment")) return fauth.signInWithRedirect(p); toast("로그인하지 못했어요"); });
+});
 $("backBtn").addEventListener("click",closeStage);
 $("fsBtn").addEventListener("click",function(){
   try{
