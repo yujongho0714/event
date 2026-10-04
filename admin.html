@@ -141,6 +141,7 @@ function render(){
     if(r.marketing) info.appendChild(el("span","tag m","소식 문자 동의"));
     info.appendChild(document.createElement("br"));
     info.appendChild(document.createTextNode(visitText(r.visit)+" · "+(r.cls||"")+" · "+(r.kids||"")));
+    if(r.area||r.school){ info.appendChild(document.createElement("br")); info.appendChild(document.createTextNode("사는 곳: "+(r.area||"-")+" · 학교: "+(r.school||"-"))); }
     box.appendChild(info);
     var acts=el("div","acts");
     var call=el("a","btn","전화"); call.href="tel:"+r.phone; acts.appendChild(call);
@@ -155,10 +156,10 @@ function render(){
 $("fBranch").addEventListener("change",render); $("fDone").addEventListener("change",render);
 
 $("csvBtn").addEventListener("click",function(){
-  var head=["신청시각","도장","당첨","방문일","수업","아이","보호자 연락처","소식 문자 동의","연락 완료"];
+  var head=["신청시각","도장","당첨·구분","방문일","수업","아이","사는 곳","학교·유치원","보호자 연락처","소식 문자 동의","연락 완료"];
   var q=function(s){ s=String(s==null?"":s); return '"'+s.replace(/"/g,'""')+'"'; };
   var lines=[head.map(q).join(",")];
-  filtered().forEach(function(r){ lines.push([new Date(r.createdAt||0).toLocaleString("ko-KR"),r.branch,r.prize,visitText(r.visit),r.cls,r.kids,fmtPhone(r.phone),r.marketing?"동의":"",r.done?"완료":""].map(q).join(",")); });
+  filtered().forEach(function(r){ lines.push([new Date(r.createdAt||0).toLocaleString("ko-KR"),r.branch,r.prize,visitText(r.visit),r.cls,r.kids,r.area||"",r.school||"",fmtPhone(r.phone),r.marketing?"동의":"",r.done?"완료":""].map(q).join(",")); });
   var blob=new Blob(["\ufeff"+lines.join("\r\n")],{type:"text/csv;charset=utf-8"});
   var a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="체험신청명단.csv"; document.body.appendChild(a); a.click(); a.remove();
   setTimeout(function(){URL.revokeObjectURL(a.href);},2000);
