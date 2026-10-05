@@ -1,8 +1,8 @@
-/* 격파 이벤트 룰렛 서비스워커
+/* 용인대 정도 태권도 서비스워커
    - 한 번 받은 화면 파일을 폰에 저장해 두고 다음부터 바로 열어요.
    - 열 때마다 새 버전이 있는지 조용히 확인하고, 바뀌었으면 다음 실행부터 새 화면이 보여요.
    - Firebase(클라우드 저장)와 구글 로그인은 항상 인터넷으로 연결해요. */
-const CACHE = 'jd-roulette-v4';
+const CACHE = 'jd-jungdo-v4';
 const SHELL = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './icon-maskable-512.png'];
 const NETWORK_ONLY = /firebaseio\.com|firebasedatabase\.app|firebaseapp\.com|googleapis\.com|accounts\.google\.com|apis\.google\.com|securetoken|identitytoolkit|youtube\.com|youtube-nocookie\.com/;
 
@@ -11,7 +11,7 @@ self.addEventListener('install', e => {
 });
 self.addEventListener('activate', e => {
   e.waitUntil(
-    caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith('jd-roulette-') && k !== CACHE).map(k => caches.delete(k))))
+    caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith('jd-jungdo-') && k !== CACHE).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });

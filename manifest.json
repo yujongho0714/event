@@ -1,7 +1,7 @@
 {
-  "name": "격파 이벤트 룰렛",
-  "short_name": "룰렛",
-  "id": "./?app=roulette-2",
+  "name": "용인대 정도 태권도",
+  "short_name": "정도태권도",
+  "id": "./?app=jungdo",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
