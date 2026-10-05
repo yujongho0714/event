@@ -341,7 +341,7 @@ button,.btn,.chip{-webkit-user-select:none;user-select:none;touch-action:manipul
     </select>
     <div id="pageFields">
       <label class="f" for="inUrl">안내 페이지 주소</label>
-      <input type="text" id="inUrl" inputmode="url" placeholder="https://yujongho0714.github.io/event/info.html">
+      <input type="text" id="inUrl" inputmode="url" placeholder="https://yujongho0714.github.io/event/join.html">
     </div>
     <div id="smsFields">
     <label class="f" for="inPhone">문자 받을 내 번호</label>
@@ -493,7 +493,7 @@ var DEFAULT={
     {id:"i5",text:"초콜릿",qr:false,color:PALETTE[4]}
   ],
   phone:"01083345800",
-  infoUrl:"https://yujongho0714.github.io/event/info.html",
+  infoUrl:"https://yujongho0714.github.io/event/join.html",
   smsTpl:"[{제목}] {경품} 당첨! 안내문 받고 싶어요. 아이 이름: ",
   qrMode:"page",
   notices:[{name:"무료체험 안내",body:"안녕하세요! 용인대 정도 태권도 2관입니다!\n격파 이벤트 무료체험 당첨을 축하드려요!\n\n-수업시간 안내-\n1부-1시30분~2시20분(초등부)\n2부-2시30분~3시20분(초등부)\n3부-3시30분~4시20분(유치부/초등부)\n4부-4시30분~5시20분(유치부/초등부)\n5부-5시30분~6시20분(유치부/초등부)\n6부-6시30분~8시(시범단/국기원심사반)\n장소-안성시 아양3로 45 4층 용인대 정도 태권도 2관\n(백성초 바로 옆! 야호분식/대단한 탕후루 건물 4층)\n\n-무료 체험 참여 방법-\n이 번호로 먼저 참여 일정관련(당일/예약방문)\n연락주시고 방문해주시면 감사하겠습니다!\n\n예)수요일 4시반부 체험수업 참여합니다.(여 7세/남 6세)"}],
@@ -501,7 +501,7 @@ var DEFAULT={
   wheelScale:1,
   lives:2,
   vibe:true,
-  texts:{"spin": "돌리기", "next": "다음 참가자", "lives": "남은 기회", "livesOut": "기회를 다 썼어요", "win": "당첨!", "retry": "한 번 더!", "retryNote": "하트가 줄지 않아요. 한 번 더 돌려요!", "leftNote": "남은 기회 {n}번", "doneNote": "모든 기회를 다 썼어요. 참여해 줘서 고마워요!", "qrGuide": "휴대폰 카메라로 QR을 찍으면 체험 안내와 신청 화면이 열려요!", "qrSub": "원하는 요일과 시간을 골라 신청 문자를 보내 주세요.", "close": "닫기"},
+  texts:{"spin": "돌리기", "next": "다음 참가자", "lives": "남은 기회", "livesOut": "기회를 다 썼어요", "win": "당첨!", "retry": "한 번 더!", "retryNote": "하트가 줄지 않아요. 한 번 더 돌려요!", "leftNote": "남은 기회 {n}번", "doneNote": "모든 기회를 다 썼어요. 참여해 줘서 고마워요!", "qrGuide": "QR을 찍고 휴대폰 번호만 남겨 주세요!", "qrSub": "확인을 누르면 체험 신청 안내 문자를 보내 드려요.", "close": "닫기"},
   guarId:"i1",
   retryId:"i3"
 };
@@ -515,6 +515,13 @@ function load(){
   return clone(DEFAULT);
 }
 var cfg=load();
+/* 예전 설정 바꾸기: 룰렛 QR → 번호 남기기 페이지 */
+function migrateCfg(c){
+  if(c.infoUrl==="https://yujongho0714.github.io/event/info.html") c.infoUrl="https://yujongho0714.github.io/event/join.html";
+  if(c.texts){ if(c.texts.qrGuide==="휴대폰 카메라로 QR을 찍으면 체험 안내와 신청 화면이 열려요!") c.texts.qrGuide="QR을 찍고 휴대폰 번호만 남겨 주세요!"; if(c.texts.qrSub==="원하는 요일과 시간을 골라 신청 문자를 보내 주세요.") c.texts.qrSub="확인을 누르면 체험 신청 안내 문자를 보내 드려요."; }
+  return c;
+}
+migrateCfg(cfg);
 function uid(){ return "i"+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
 cfg.items.forEach(function(it){ if(!it.id) it.id=uid(); });
 var saveTimer=null;
@@ -854,7 +861,7 @@ loadScriptR(FBV+"firebase-app-compat.js")
       var r=s.val(); if(!r||!Array.isArray(r.items)||r.items.length<2) return;
       if((r.savedAt||0)<=(cfg.savedAt||0)) return;
       var d=clone(DEFAULT); for(var k in d){ if(r[k]!==undefined) d[k]=r[k]; } d.savedAt=r.savedAt;
-      cfg=d; saveLocal(); refreshSetup(); toast("저장된 룰렛 설정을 불러왔어요");
+      cfg=migrateCfg(d); saveLocal(); refreshSetup(); toast("저장된 룰렛 설정을 불러왔어요");
     }).catch(function(){});
     fauth.onAuthStateChanged(function(u){
       fuser=u;
@@ -987,7 +994,7 @@ function confetti(){
 
 /* ---------- 시작 ---------- */
 renderItems(); renderNotices(); buildRivets(); drawPreview(); renderRuleSelects();
-var TX_DEF={"spin": "돌리기", "next": "다음 참가자", "lives": "남은 기회", "livesOut": "기회를 다 썼어요", "win": "당첨!", "retry": "한 번 더!", "retryNote": "하트가 줄지 않아요. 한 번 더 돌려요!", "leftNote": "남은 기회 {n}번", "doneNote": "모든 기회를 다 썼어요. 참여해 줘서 고마워요!", "qrGuide": "휴대폰 카메라로 QR을 찍으면 체험 안내와 신청 화면이 열려요!", "qrSub": "원하는 요일과 시간을 골라 신청 문자를 보내 주세요.", "close": "닫기"};
+var TX_DEF={"spin": "돌리기", "next": "다음 참가자", "lives": "남은 기회", "livesOut": "기회를 다 썼어요", "win": "당첨!", "retry": "한 번 더!", "retryNote": "하트가 줄지 않아요. 한 번 더 돌려요!", "leftNote": "남은 기회 {n}번", "doneNote": "모든 기회를 다 썼어요. 참여해 줘서 고마워요!", "qrGuide": "QR을 찍고 휴대폰 번호만 남겨 주세요!", "qrSub": "확인을 누르면 체험 신청 안내 문자를 보내 드려요.", "close": "닫기"};
 function T(k){ var t=(cfg.texts||{})[k]; return (t&&String(t).trim())?t:TX_DEF[k]; }
 function fillTexts(){ document.querySelectorAll("[data-tx]").forEach(function(i){ i.placeholder=TX_DEF[i.dataset.tx]; i.value=(cfg.texts||{})[i.dataset.tx]||""; }); $("mClose").textContent=T("close"); }
 document.querySelectorAll("[data-tx]").forEach(function(i){ i.addEventListener("input",function(){ cfg.texts=cfg.texts||{}; cfg.texts[i.dataset.tx]=i.value; save(); $("mClose").textContent=T("close"); }); });

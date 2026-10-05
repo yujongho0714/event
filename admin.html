@@ -48,6 +48,22 @@ header .btn{background:transparent;color:#fff;border-color:rgba(255,255,255,.35)
 .acts .btn.done-on{border-color:var(--ok);color:var(--ok)}
 .acts .del{margin-left:auto;color:var(--red)}
 .note{font-size:13px;color:var(--muted);line-height:1.6;margin-top:16px}
+.sendbox{background:var(--card);border:2px solid #1d7a4c;border-radius:14px;padding:14px;margin-bottom:12px}
+.sendbox .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sendbox b{font-size:16px;flex:1 1 auto}
+.sendbox .btn.go{background:#1d7a4c;border-color:#1d7a4c;color:#fff}
+.sendbox textarea{width:100%;min-height:170px;margin-top:10px;padding:10px;border:1.5px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:14px/1.55 "Noto Sans KR",sans-serif}
+.sendbox .hint{font-size:12.5px;color:var(--muted);margin:6px 0 0;line-height:1.5}
+.tag.lead{background:#1d7a4c;color:#fff}
+.tag.sent{background:#e6f4ec;color:#1d7a4c}
+.tag.unsent{background:#fff1f1;color:#a11}
+.seq{position:fixed;inset:0;z-index:60;background:rgba(10,14,30,.7);display:flex;align-items:center;justify-content:center;padding:18px}
+.seq .bx{background:var(--card);color:var(--ink);border-radius:18px;width:min(420px,100%);padding:22px 18px;text-align:center}
+.seq .cnt{color:var(--muted);font-weight:700}
+.seq .ph{font-family:var(--display);font-size:34px;margin:10px 0 4px;letter-spacing:1px}
+.seq .pz{color:var(--muted);font-size:14px;min-height:20px}
+.seq .send{display:block;margin:16px 0 10px;padding:16px;border-radius:12px;background:#1d7a4c;color:#fff;font-family:var(--display);font-size:22px;text-decoration:none;box-shadow:0 4px 0 #0f4a2d}
+.seq .row2{display:flex;gap:8px}.seq .row2 button{flex:1}
 </style>
 </head>
 <body>
@@ -65,10 +81,21 @@ header .btn{background:transparent;color:#fff;border-color:rgba(255,255,255,.35)
   <div id="listBox" class="hidden">
     <div class="bar">
       <select id="fBranch" aria-label="도장 선택"><option value="">전체 도장</option><option value="2관">2관</option><option value="1·3관">1·3관</option></select>
-      <select id="fType" aria-label="신청 구분"><option value="">전체 구분</option><option value="event">격파 이벤트 당첨</option><option value="normal">일반 체험 신청</option><option value="consult">온라인 상담</option></select>
+      <select id="fType" aria-label="신청 구분"><option value="">전체 구분</option><option value="event">격파 이벤트 당첨</option><option value="normal">일반 체험 신청</option><option value="consult">온라인 상담</option><option value="lead">문자 안내 요청</option></select>
       <select id="fDone" aria-label="연락 상태"><option value="">전체</option><option value="todo">연락 전</option><option value="done">연락 완료</option></select>
       <button class="btn" id="csvBtn" type="button" style="background:#1d7a4c;border-color:#1d7a4c;color:#fff">엑셀 파일 받기</button>
       <span class="sum" id="sum"></span>
+    </div>
+    <div class="sendbox" id="sendBox">
+      <div class="row"><b>안내 문자 보낼 사람 <span id="pendN">0</span>명</b>
+        <button class="btn go" id="seqBtn" type="button">차례로 보내기</button>
+        <button class="btn" id="tplBtn" type="button">문자 내용 고치기</button></div>
+      <div id="tplBox" class="hidden">
+        <textarea id="tpl" aria-label="안내 문자 내용"></textarea>
+        <p class="hint">{경품}은 당첨 경품으로 바뀌고, 경품이 없으면 그 줄은 빠져요. 광고성 문자라서 맨 앞 "(광고)"와 마지막 수신거부 안내는 지우지 마세요.</p>
+        <div class="row" style="margin-top:8px"><button class="btn go" id="tplSave" type="button">저장</button><button class="btn" id="tplReset" type="button">기본 문구로</button></div>
+      </div>
+      <p class="hint">한 사람씩 문자 창이 열려요. 전송을 누르고 돌아오면 다음 사람이 나와요. 여러 명을 한 문자에 넣으면 단체 대화방이 돼서 서로 번호가 보일 수 있어서, 한 명씩 보내게 만들었어요.</p>
     </div>
     <div id="list"></div>
     <p class="note">보관 기간(이벤트 후 3개월)이 지나면 <button class="btn" id="cleanBtn" type="button">3개월 지난 신청 삭제</button> 를 눌러 정리해 주세요.</p>
@@ -125,7 +152,7 @@ auth.onAuthStateChanged(function(u){
 function fmtTime(t){ if(!t) return ""; var d=new Date(t); return (d.getMonth()+1)+"/"+d.getDate()+" "+d.getHours()+":"+("0"+d.getMinutes()).slice(-2); }
 function fmtPhone(p){ p=String(p||""); return p.length===11?p.slice(0,3)+"-"+p.slice(3,7)+"-"+p.slice(7):p.length===10?p.slice(0,3)+"-"+p.slice(3,6)+"-"+p.slice(6):p; }
 function visitText(v){ if(!v) return ""; if(v==="오늘") return "당일 방문"; var p=v.split("-"); if(p.length!==3) return v; var d=new Date(+p[0],+p[1]-1,+p[2]); return (d.getMonth()+1)+"월 "+d.getDate()+"일("+"일월화수목금토"[d.getDay()]+")"; }
-function typeOf(r){ var p=r.prize||""; if(p==="온라인 상담") return "consult"; if(p===""||p==="일반 신청") return "normal"; return "event"; }
+function typeOf(r){ if(r.kind==="lead") return "lead"; var p=r.prize||""; if(p==="온라인 상담") return "consult"; if(p===""||p==="일반 신청") return "normal"; return "event"; }
 function filtered(){
   var fb=$("fBranch").value, fd=$("fDone").value, ft=$("fType").value;
   return rows.filter(function(r){ return (!fb||r.branch===fb)&&(!fd||(fd==="done"?r.done:!r.done))&&(!ft||typeOf(r)===ft); });
@@ -133,6 +160,7 @@ function filtered(){
 
 function el(tag,cls,txt){ var e=document.createElement(tag); if(cls) e.className=cls; if(txt!=null) e.textContent=txt; return e; }
 function render(){
+  $("pendN").textContent=pending().length;
   var list=$("list"), data=filtered(); list.innerHTML="";
   $("sum").textContent="총 "+data.length+"건 · 연락 전 "+data.filter(function(r){return !r.done;}).length+"건";
   if(!data.length){ list.appendChild(el("p","note","아직 신청이 없어요. QR로 신청이 들어오면 여기에 바로 나타나요.")); return; }
@@ -140,17 +168,20 @@ function render(){
     var box=el("div","item"+(r.done?" done":""));
     var top=el("div","top"); top.appendChild(el("span","who",contactText(r))); top.appendChild(el("span","when","신청 "+fmtTime(r.createdAt))); box.appendChild(top);
     var info=el("div","info");
-    info.appendChild(el("span","tag b",r.branch||""));
+    if(r.kind==="lead"){ info.appendChild(el("span","tag lead","문자 안내 요청")); info.appendChild(el("span","tag "+(r.sent?"sent":"unsent"),r.sent?"안내 보냄":"아직 안 보냄")); }
+    else info.appendChild(el("span","tag b",r.branch||""));
     if(r.prize) info.appendChild(el("span","tag",r.prize));
     info.appendChild(el("span","tag"+(r.marketing?" m":""),r.marketing?"소식 문자 동의":"소식 문자 미동의"));
-    info.appendChild(document.createElement("br"));
-    info.appendChild(document.createTextNode(visitText(r.visit)+" · "+(r.cls||"")+" · "+(r.kids||"")));
+    if(r.kind!=="lead"){ info.appendChild(document.createElement("br"));
+    info.appendChild(document.createTextNode(visitText(r.visit)+" · "+(r.cls||"")+" · "+(r.kids||""))); }
     if(r.area||r.school){ info.appendChild(document.createElement("br")); info.appendChild(document.createTextNode("사는 곳: "+(r.area||"-")+" · 학교: "+(r.school||"-"))); }
     box.appendChild(info);
     var acts=el("div","acts");
     if(r.phone){ var call=el("a","btn","전화"); call.href="tel:"+r.phone; acts.appendChild(call);
       var sms=el("a","btn","문자"); sms.href="sms:"+r.phone; acts.appendChild(sms); }
     else if(r.contact==="kakao"){ var kk=el("a","btn","카톡 열기"); kk.href="https://open.kakao.com/o/sC74HRQi"; kk.target="_blank"; acts.appendChild(kk); }
+    if(r.kind==="lead"){ var sb=el("button","btn",r.sent?"보냄 취소":"보냄으로 표시"); sb.type="button"; sb.addEventListener("click",function(){ ref.child(r.id).update({sent:!r.sent}); }); acts.appendChild(sb);
+      var one=el("a","btn","안내 문자"); one.href=smsTo(r.phone,leadMsg(r)); one.addEventListener("click",function(){ ref.child(r.id).update({sent:true,sentAt:firebase.database.ServerValue.TIMESTAMP}); }); acts.appendChild(one); }
     var dn=el("button","btn"+(r.done?" done-on":""),r.done?"연락 완료 ✓":"연락 완료로 표시"); dn.type="button";
     dn.addEventListener("click",function(){ ref.child(r.id).update({done:!r.done}); }); acts.appendChild(dn);
     var del=el("button","btn del","삭제"); del.type="button";
@@ -160,6 +191,33 @@ function render(){
 }
 $("fBranch").addEventListener("change",render); $("fDone").addEventListener("change",render); $("fType").addEventListener("change",render);
 
+var DEF_TPL="(광고) [정도태권도] 체험 신청 접수 안내\n격파 이벤트에 참여해 주셔서 감사합니다!\n당첨: {경품}\n\n▶ 체험 신청: https://yujongho0714.github.io/event/info.html\n▶ 도장 홈페이지: https://yujongho0714.github.io/jungdo/\n\n문의: 010-8334-5800\n수신거부: 이 번호로 \"거부\"라고 답장 주세요";
+var TPL=DEF_TPL;
+firebase.database().ref("site/leadMsg").on("value",function(s){ var v=s.val(); TPL=(typeof v==="string"&&v.trim())?v:DEF_TPL; },function(){});
+function leadMsg(r){ var p=(r&&r.prize)||""; return TPL.split("\n").filter(function(l){ return p||l.indexOf("{경품}")<0; }).join("\n").split("{경품}").join(p); }
+function isIOS(){ return /iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1); }
+function smsTo(num,body){ var b=encodeURIComponent(body); return isIOS()?("sms:"+num+"&body="+b):("sms:"+num+"?body="+b); }
+function pending(){ var seen={}, out=[]; rows.filter(function(r){ return r.kind==="lead"&&!r.sent&&r.phone; }).forEach(function(r){ if(!seen[r.phone]){ seen[r.phone]=1; out.push(r); } }); return out.reverse(); }
+$("tplBtn").addEventListener("click",function(){ $("tplBox").classList.toggle("hidden"); $("tpl").value=TPL; });
+$("tplReset").addEventListener("click",function(){ $("tpl").value=DEF_TPL; });
+$("tplSave").addEventListener("click",function(){ var v=$("tpl").value.trim(); firebase.database().ref("site/leadMsg").set(v||null).then(function(){ alert("문자 내용을 저장했어요."); $("tplBox").classList.add("hidden"); },function(){ alert("저장하지 못했어요."); }); });
+var seqList=[], seqI=0, seqEl=null;
+function markSent(r){ rows.filter(function(x){ return x.kind==="lead"&&x.phone===r.phone&&!x.sent; }).forEach(function(x){ ref.child(x.id).update({sent:true,sentAt:firebase.database.ServerValue.TIMESTAMP}); }); }
+function seqShow(){
+  if(seqEl) seqEl.remove(); seqEl=null;
+  if(seqI>=seqList.length){ alert(seqList.length?"모두 보냈어요!":"보낼 사람이 없어요."); return; }
+  var r=seqList[seqI]; seqEl=el("div","seq"); var bx=el("div","bx");
+  bx.appendChild(el("div","cnt",(seqI+1)+" / "+seqList.length));
+  bx.appendChild(el("div","ph",fmtPhone(r.phone)));
+  bx.appendChild(el("div","pz",r.prize?("당첨: "+r.prize):""));
+  var a=el("a","send","문자 보내기"); a.href=smsTo(r.phone,leadMsg(r));
+  a.addEventListener("click",function(){ markSent(r); seqI++; setTimeout(seqShow,600); });
+  bx.appendChild(a);
+  var row=el("div","row2"); var sk=el("button","btn","건너뛰기"); sk.type="button"; sk.addEventListener("click",function(){ seqI++; seqShow(); });
+  var st=el("button","btn","그만하기"); st.type="button"; st.addEventListener("click",function(){ seqEl.remove(); seqEl=null; });
+  row.appendChild(sk); row.appendChild(st); bx.appendChild(row); seqEl.appendChild(bx); document.body.appendChild(seqEl);
+}
+$("seqBtn").addEventListener("click",function(){ seqList=pending(); seqI=0; seqShow(); });
 function contactText(r){ if(r.phone) return fmtPhone(r.phone); return r.contact==="kakao"?"카톡 상담":"문자 신청 (번호는 문자함에서)"; }
 function kidRows(r){
   if(Array.isArray(r.kidsList)&&r.kidsList.length) return r.kidsList;
@@ -172,7 +230,7 @@ $("csvBtn").addEventListener("click",function(){
   var head=["학교·유치원","구분","성별","도장","나이","사는 곳","연락 방법","신청 일시","신청 종류","방문 희망일","희망 수업","소식 문자 동의","연락 완료"];
   var aoa=[head];
   data.forEach(function(r){
-    var kind=typeOf(r)==="event"?"격파 이벤트 ("+r.prize+")":typeOf(r)==="consult"?"온라인 상담":"일반 체험 신청";
+    var kind=typeOf(r)==="lead"?("문자 안내 요청"+(r.prize?" ("+r.prize+")":"")+(r.sent?" · 보냄":" · 안 보냄")):typeOf(r)==="event"?"격파 이벤트 ("+r.prize+")":typeOf(r)==="consult"?"온라인 상담":"일반 체험 신청";
     var ks=kidRows(r); if(!ks.length) ks=[{name:"",g:"",age:""}];
     ks.forEach(function(k){
       aoa.push([r.school||"",stage(k.age),k.g||"",r.branch||"",k.age||"",r.area||"",contactText(r),new Date(r.createdAt||0).toLocaleString("ko-KR"),kind,visitText(r.visit),r.cls||"",r.marketing?"동의":"미동의",r.done?"완료":""]);
