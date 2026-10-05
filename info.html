@@ -33,7 +33,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);-web
 button,input,select,textarea{font:inherit;color:inherit}
 :focus-visible{outline:3px solid #4d8bff;outline-offset:2px}
 .hidden{display:none!important}
-.wrap{max-width:540px;margin:0 auto;padding-bottom:110px}
+.wrap{max-width:540px;margin:0 auto;padding-bottom:40px}
 
 .hero{background:var(--card);border-bottom:1px solid var(--line);padding:14px 18px 26px}
 .hero-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
@@ -86,7 +86,10 @@ input[type=date],input[type=text],select{width:100%;padding:11px 12px;border:1.5
 .classes button span{font-size:13px;color:var(--muted)}
 .classes button[aria-pressed="true"]{border-color:var(--red);background:var(--pick)}
 .classes button[aria-pressed="true"] b{color:var(--red)}
-.kid{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.kid{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px;padding-bottom:12px;border-bottom:1px dashed var(--line)}
+.kid:last-child{border-bottom:0;padding-bottom:0}
+.kid .kname{flex:1 1 100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--field);font-size:16px}
+.kid .kname::placeholder{color:#9aa0ad}
 .kid .seg{flex:0 0 120px}
 .kid .seg button{padding:10px 0}
 .kid select{flex:1}
@@ -120,6 +123,18 @@ body.editing [contenteditable]{outline:2px dashed var(--red);outline-offset:3px;
 .edit-bar span{flex:1 1 100%}
 .edit-bar button{border:0;border-radius:6px;background:#fff;color:var(--red);font-weight:700;padding:7px 11px;cursor:pointer}
 body.editing .wrap{padding-top:70px}
+#contactSeg button{font-size:14px;padding:11px 6px;line-height:1.3}
+.kakao-note{margin:10px 0 0;padding:11px 13px;border-radius:10px;background:#fee500;color:#191919;font-size:14px;line-height:1.55;word-break:keep-all}
+.send-bar a.kakao{background:#fee500;color:#191919;box-shadow:0 5px 0 #c9b400}
+.apply-acts{margin-top:18px;display:flex;flex-direction:column;gap:6px}
+.apply-acts a{display:flex;align-items:center;justify-content:center;gap:10px;padding:16px;border-radius:14px;text-decoration:none;font-family:var(--display);font-size:20px;line-height:1.2;transition:transform 90ms ease-out,box-shadow 90ms ease-out}
+.go-sms{background:var(--red);color:#fff;box-shadow:0 5px 0 var(--red-dark)}
+.go-kakao{background:#fee500;color:#191919;box-shadow:0 5px 0 #c9b400;margin-top:10px}
+.go-kakao svg{width:26px;height:24px;fill:#3c1e1e;flex:0 0 auto}
+.apply-acts a:active,.apply-acts a.is-pressed{transform:translateY(3px)}
+.go-sms:active,.go-sms.is-pressed{box-shadow:0 2px 0 var(--red-dark)!important}
+.go-kakao:active,.go-kakao.is-pressed{box-shadow:0 2px 0 #c9b400!important}
+.go-cap{margin:2px 0 0;text-align:center;font-size:14px;color:var(--muted);line-height:1.5;word-break:keep-all}
 .err{color:var(--red);font-size:14px;font-weight:700;margin:8px 0 0}
 
 .send-bar{position:fixed;left:0;right:0;bottom:0;padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));background:linear-gradient(to top,var(--bg) 70%,transparent);z-index:10}
@@ -213,12 +228,10 @@ button,.btn,.chip{-webkit-user-select:none;user-select:none;touch-action:manipul
     <p class="step" data-k="stepSchool">다니는 학교·유치원</p>
     <input type="text" id="school" maxlength="30" aria-label="다니는 학교 또는 유치원" data-ph="phSchool" placeholder="예: 백성초등학교, OO유치원">
 
-    <p class="step" data-k="stepPhone">보호자 연락처</p>
-    <input type="text" id="parentPhone" placeholder="010-0000-0000" inputmode="tel" autocomplete="tel" aria-label="보호자 연락처">
     <div class="consent">
       <label><input type="checkbox" id="agree"><span data-k="agreeTxt">[필수] 개인정보 수집·이용에 동의해요</span></label>
       <details><summary data-k="consentMore">내용 보기</summary>
-        <p data-k="consentBody" style="white-space:pre-line">수집 항목: 보호자 연락처, 아이 성별·나이, 사는 곳, 학교·유치원, 희망 도장·날짜·수업
+        <p data-k="consentBody" style="white-space:pre-line">수집 항목: 아이 성별·나이, 사는 곳, 학교·유치원, 희망 도장·날짜·수업
 목적: 무료체험 일정 안내 및 연락
 보관 기간: 이벤트 종료 후 3개월까지, 이후 삭제
 동의하지 않을 수 있으며, 이 경우 이 화면으로 체험 신청은 어려워요. 전화로 문의해 주세요.</p>
@@ -227,9 +240,17 @@ button,.btn,.chip{-webkit-user-select:none;user-select:none;touch-action:manipul
       <p class="mkt-note" data-k="mktNote">보물찾기, 주말행사, 입학생 학교적응교실 등 다양한 행사를 안내드릴 예정입니다.</p>
     </div>
 
-    <p class="step" data-k="stepPreview">보내질 문자</p>
-    <div class="preview" id="preview"></div>
+    <div class="preview hidden" id="preview"></div>
     <p class="err hidden" id="err"></p>
+    <div class="apply-acts">
+      <a id="sendBtn" class="go-sms" href="#"><span data-k="sendTxt">신청 문자 보내기</span></a>
+      <p class="go-cap" data-k="smsCap">문자 내용이 자동으로 작성돼요🙏</p>
+      <a id="kakaoBtn" class="go-kakao" href="https://open.kakao.com/o/sC74HRQi" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 22" aria-hidden="true"><path d="M12 1C5.9 1 1 4.9 1 9.6c0 3 2 5.7 5.1 7.2-.2.8-.8 2.9-.9 3.4-.1.6.2.6.5.4.2-.1 3.2-2.2 4.5-3.1.6.1 1.2.1 1.8.1 6.1 0 11-3.9 11-8.6S18.1 1 12 1z"/></svg>
+        <span data-k="kakaoTxt">카톡으로 신청하기</span>
+      </a>
+      <p class="go-cap" data-k="kakaoCap">신청 내용이 복사되어 있어요. 채팅방에 들어오셔서 입력창을 꾹 눌러 붙여넣기 하시면 돼요.</p>
+    </div>
   </section>
 
   <section class="reveal">
@@ -245,6 +266,7 @@ button,.btn,.chip{-webkit-user-select:none;user-select:none;touch-action:manipul
     <h2>관리자 설정</h2>
     <p class="hint-e">점선 글자는 눌러서 바로 고치고, 아래 칸도 채운 뒤 맨 위 저장을 누르세요. {관}은 도장 이름, {경품}은 당첨 경품, {도장}은 도장 전체 이름으로 바뀌어요.</p>
     <label class="fe">신청 문자를 받을 번호<input type="text" id="e_phone"></label>
+    <label class="fe">카카오톡 오픈채팅 주소<input type="text" id="e_kakao"></label>
     <label class="fe">이 도장 전체 이름 ({도장})<input type="text" id="e_name"></label>
     <label class="fe">이 도장 전화번호 (전화 문의 버튼)<input type="text" id="e_tel"></label>
     <label class="fe">이 도장 지도 검색어<input type="text" id="e_map"></label>
@@ -264,7 +286,6 @@ button,.btn,.chip{-webkit-user-select:none;user-select:none;touch-action:manipul
 </div>
 <div class="edit-bar hidden" id="editBar"><span id="editMsg">관리자 로그인</span><button type="button" id="editOn">글 고치기</button><button type="button" id="editSave" class="hidden">저장</button><button type="button" id="editCancel" class="hidden">취소</button><button type="button" id="editOut">로그아웃</button></div>
 
-<div class="send-bar"><a id="sendBtn" href="#" data-k="sendTxt">신청 문자 보내기</a></div>
 <div class="viewer hidden" id="viewer" role="dialog" aria-modal="true" aria-label="포스터 크게 보기"><button type="button" id="viewerClose">닫기</button><img id="viewerImg" alt=""></div>
 <div class="toast" id="toast"></div>
 
@@ -272,7 +293,7 @@ button,.btn,.chip{-webkit-user-select:none;user-select:none;touch-action:manipul
 /* 눌림(타격감) · 페이드 공통 */
 (function(){
   var reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var SEL="button:not(.no-press),.btn,.chip,.send-bar a,.home-btn";
+  var SEL="button:not(.no-press),.btn,.chip,.apply-acts a,.home-btn";
   document.addEventListener("pointerdown",function(e){
     var b=e.target.closest&&e.target.closest(SEL); if(!b||b.disabled) return;
     b.classList.add("is-pressed"); var t=Date.now();
@@ -332,7 +353,7 @@ var BRANCHES=[
 ];
 var branch=0;
 var MODE="normal";
-var TPL={helloTpl:"안녕하세요! {도장}입니다!",timesTpl:"{관} 수업시간 안내",titleWon:"격파 이벤트\n당첨을 축하드려요!",titleNormal:"무료체험 안내",titleConsult:"온라인 상담 접수",
+var TPL={sendKakao:"신청하고 카톡으로 상담하기",helloTpl:"안녕하세요! {도장}입니다!",timesTpl:"{관} 수업시간 안내",titleWon:"격파 이벤트\n당첨을 축하드려요!",titleNormal:"무료체험 안내",titleConsult:"온라인 상담 접수",
   msgWon:"[격파 이벤트 {경품} 당첨, {관}]",msgNormal:"[무료체험 신청, {관}]",msgConsult:"[온라인 상담 신청, {관}]",msgEnd:"체험수업 참여합니다.",phArea:"예: 시티, 아양주공1단지, 신원",phSchool:"예: 백성초등학교, OO유치원"};
 var TX={};
 function CL(){return BRANCHES[branch].classes;}
@@ -382,7 +403,8 @@ document.addEventListener("keydown",function(e){ if(e.key==="Escape") closeViewe
 
 
 /* 신청 상태 */
-var state={when:"reserve",date:"",cls:0,kids:[{g:"",age:""}]};
+var state={when:"reserve",date:"",cls:0,kids:[{g:"",age:"",name:""}],contact:"sms"};
+var KAKAO="https://open.kakao.com/o/sC74HRQi";
 function pad(n){return (n<10?"0":"")+n;}
 var now=new Date(), todayStr=now.getFullYear()+"-"+pad(now.getMonth()+1)+"-"+pad(now.getDate());
 $("date").min=todayStr;
@@ -437,7 +459,7 @@ function renderKids(){
   });
   $("addKid").classList.toggle("hidden",state.kids.length>=4);
 }
-$("addKid").addEventListener("click",function(){ state.kids.push({g:"",age:""}); renderKids(); update(); });
+$("addKid").addEventListener("click",function(){ state.kids.push({g:"",age:"",name:""}); renderKids(); update(); });
 
 function isIOS(){return /iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);}
 function smsHref(num,body){var b=encodeURIComponent(body);return isIOS()?("sms:"+num+"&body="+b):("sms:"+num+"?body="+b);}
@@ -449,7 +471,7 @@ function message(){
   else day="(날짜 선택)";
   var c=CL().find(function(x){return x.n===state.cls;});
   var cls=c?(c.n+"부("+c.short+")"):"(수업 선택)";
-  var kids=state.kids.filter(function(k){return k.g||k.age;}).map(function(k){return (k.g||"?")+" "+(k.age||"?");}).join("/");
+  var kids=state.kids.filter(function(k){return k.g||k.age||(k.name||"").trim();}).map(function(k){return ((k.name||"").trim()?k.name.trim()+" ":"")+(k.g||"?")+" "+(k.age||"?");}).join("/");
   var head=fill(tx(MODE==="won"?"msgWon":MODE==="consult"?"msgConsult":"msgNormal"));
   var ar=$("area").value.trim(), sc=$("school").value.trim();
   return head+"\n"+day+" "+cls+" "+tx("msgEnd")+(kids?" ("+kids+")":"")+((ar||sc)?"\n사는 곳: "+(ar||"-")+" / 학교: "+(sc||"-"):"");
@@ -458,15 +480,15 @@ function problems(){
   if(state.when==="reserve"&&!state.date) return "방문 날짜를 골라 주세요";
   if(!state.cls) return "몇 부 수업에 오실지 골라 주세요";
   if(!state.kids.some(function(k){return k.g&&k.age;})) return "아이 성별과 나이를 골라 주세요";
+  for(var ki=0;ki<state.kids.length;ki++){ var kk=state.kids[ki]; if((kk.g||kk.age)&&!(kk.g&&kk.age)) return (ki+1)+"번째 아이의 성별과 나이를 모두 골라 주세요"; }
   if(!$("area").value.trim()) return "사는 곳을 간단히 적어 주세요";
   if(!$("school").value.trim()) return "다니는 학교나 유치원을 적어 주세요";
-  if(!/^01[016789][0-9]{7,8}$/.test(cleanPhone($("parentPhone").value))) return "보호자 연락처를 정확히 입력해 주세요";
   if(!$("agree").checked) return "개인정보 수집·이용에 동의해 주세요";
   return "";
 }
-function update(){ var m=message(); $("preview").textContent=m; $("sendBtn").href=smsHref(PHONE,m); $("err").classList.add("hidden"); }
+function update(){ var m=message(); $("preview").textContent=m; $("sendBtn").href=smsHref(PHONE,m); $("kakaoBtn").href=KAKAO; $("err").classList.add("hidden"); }
 function cleanPhone(p){return String(p||"").replace(/[^0-9]/g,"");}
-["parentPhone","agree","mkt"].forEach(function(id){ $(id).addEventListener("input",function(){ $("err").classList.add("hidden"); }); });
+["agree","mkt"].forEach(function(id){ $(id).addEventListener("input",function(){ $("err").classList.add("hidden"); }); });
 ["area","school"].forEach(function(id){ $(id).addEventListener("input",function(){ $("err").classList.add("hidden"); update(); }); });
 var lastSaved="", busy=false;
 function record(){
@@ -476,8 +498,10 @@ function record(){
     area:$("area").value.trim().slice(0,30), school:$("school").value.trim().slice(0,30),
     visit:state.when==="today"?"오늘":state.date,
     cls:state.cls+"부 ("+(c?c.t:"")+")",
-    kids:state.kids.filter(function(k){return k.g&&k.age;}).map(function(k){return k.g+" "+k.age;}).join("/"),
-    phone:cleanPhone($("parentPhone").value),
+    kids:state.kids.filter(function(k){return k.g&&k.age;}).map(function(k){return ((k.name||"").trim()?k.name.trim()+" ":"")+k.g+" "+k.age;}).join("/"),
+    kidsList:state.kids.filter(function(k){return k.g&&k.age;}).map(function(k){return {name:(k.name||"").trim().slice(0,12),g:k.g,age:k.age};}),
+    phone:"",
+    contact:state.contact,
     marketing:$("mkt").checked, consent:true, done:false,
     createdAt:{".sv":"timestamp"}
   };
@@ -488,21 +512,27 @@ function saveSignup(rec){
   var timeout=new Promise(function(res){ setTimeout(function(){res(false);},3000); });
   return Promise.race([req,timeout]).catch(function(){return false;});
 }
-$("sendBtn").addEventListener("click",function(e){
+function submit(e,kakao){
   e.preventDefault();
-  if(busy) return;
+  if(editing||busy) return;
   var p=problems();
   if(p){ $("err").textContent=p; $("err").classList.remove("hidden"); $("err").scrollIntoView({behavior:"smooth",block:"center"}); return; }
-  var href=smsHref(PHONE,message()), rec=record(), key=JSON.stringify([rec.branch,rec.visit,rec.cls,rec.kids,rec.phone]);
-  if(key===lastSaved){ location.href=href; return; }
-  busy=true; var btn=$("sendBtn"), label=btn.textContent; btn.textContent="신청 저장 중...";
-  saveSignup(rec).then(function(){ lastSaved=key; busy=false; btn.textContent=label; location.href=href; });
-});
+  state.contact=kakao?"kakao":"sms";
+  var msg=message(), href=kakao?KAKAO:smsHref(PHONE,msg), rec=record();
+  var key=JSON.stringify([rec.branch,rec.visit,rec.cls,rec.kids,rec.contact,rec.area,rec.school]);
+  if(kakao){ try{ copyText(msg); toast("신청 내용을 복사했어요. 채팅방에 붙여넣어 주세요"); }catch(_){} }
+  var go=function(){ if(kakao){ var w=window.open(href,"_blank"); if(!w) location.href=href; } else location.href=href; };
+  if(key===lastSaved){ go(); return; }
+  busy=true;
+  saveSignup(rec).then(function(){ lastSaved=key; busy=false; go(); });
+}
+$("sendBtn").addEventListener("click",function(e){ submit(e,false); });
+$("kakaoBtn").addEventListener("click",function(e){ submit(e,true); });
 
 var editing=false, fbReady=null, fdb=null, fauth=null, W=null;
 function applyRemote(v){
   if(!v) return;
-  TX=v.texts||{}; if(v.phone) PHONE=v.phone;
+  TX=v.texts||{}; if(v.phone) PHONE=v.phone; if(v.kakao) KAKAO=v.kakao;
   (v.branches||[]).forEach(function(b,i){ if(!BRANCHES[i]||!b) return; ["name","addr","sub","map","tel"].forEach(function(k){ if(b[k]) BRANCHES[i][k]=b[k]; }); if(Array.isArray(b.classes)&&b.classes.length) BRANCHES[i].classes=b.classes; });
 }
 fetch(DB_URL+"/site/info.json").then(function(r){ return r.ok?r.json():null; }).then(function(v){ if(v){ applyRemote(v); applyBranch(); } }).catch(function(){});
@@ -530,11 +560,12 @@ $("adminBtn").addEventListener("click",function(){
 });
 function fillPanel(){
   var B=BRANCHES[branch];
-  $("e_phone").value=PHONE; $("e_name").value=B.name; $("e_tel").value=B.tel; $("e_map").value=B.map;
+  $("e_phone").value=PHONE; $("e_kakao").value=KAKAO; $("e_name").value=B.name; $("e_tel").value=B.tel; $("e_map").value=B.map;
   ["helloTpl","timesTpl","titleWon","titleNormal","titleConsult","msgWon","msgNormal","msgConsult","msgEnd","phArea","phSchool"].forEach(function(k){ $("e_"+k).value=tx(k); });
 }
 ["helloTpl","timesTpl","titleWon","titleNormal","titleConsult","msgWon","msgNormal","msgConsult","msgEnd","phArea","phSchool"].forEach(function(k){ $("e_"+k).addEventListener("input",function(){ TX[k]=$("e_"+k).value; if(k==="phArea"||k==="phSchool") applyTexts(); update(); }); });
 $("e_phone").addEventListener("input",function(){ PHONE=$("e_phone").value.replace(/[^0-9]/g,""); update(); });
+$("e_kakao").addEventListener("input",function(){ var v=$("e_kakao").value.trim(); if(/^https:\/\//.test(v)) KAKAO=v; update(); });
 [["e_name","name"],["e_tel","tel"],["e_map","map"]].forEach(function(x){ $(x[0]).addEventListener("input",function(){ BRANCHES[branch][x[1]]=x[1]==="tel"?$(x[0]).value.replace(/[^0-9]/g,""):$(x[0]).value; }); });
 function setEditing(on){
   editing=on; document.body.classList.toggle("editing",on);
@@ -554,11 +585,11 @@ document.addEventListener("input",function(e){
   else if(t.id==="addr") BRANCHES[branch].addr=t.textContent.trim(); else if(t.id==="addrSub") BRANCHES[branch].sub=t.textContent.trim();
 });
 var backup=null;
-$("editOn").addEventListener("click",function(){ backup=JSON.stringify({TX:TX,B:BRANCHES,P:PHONE}); setEditing(true); window.scrollTo({top:0,behavior:"smooth"}); });
-$("editCancel").addEventListener("click",function(){ var b=JSON.parse(backup); TX=b.TX; BRANCHES=b.B; PHONE=b.P; setEditing(false); });
+$("editOn").addEventListener("click",function(){ backup=JSON.stringify({TX:TX,B:BRANCHES,P:PHONE,K:KAKAO}); setEditing(true); window.scrollTo({top:0,behavior:"smooth"}); });
+$("editCancel").addEventListener("click",function(){ var b=JSON.parse(backup); TX=b.TX; BRANCHES=b.B; PHONE=b.P; KAKAO=b.K||KAKAO; setEditing(false); });
 $("editOut").addEventListener("click",function(){ if(fauth) fauth.signOut(); setEditing(false); $("editBar").classList.add("hidden"); });
 $("editSave").addEventListener("click",function(){
-  var data={texts:TX,phone:PHONE,branches:BRANCHES.map(function(b){ return {key:b.key,name:b.name,addr:b.addr,sub:b.sub,map:b.map,tel:b.tel,classes:b.classes}; })};
+  var data={texts:TX,phone:PHONE,kakao:KAKAO,branches:BRANCHES.map(function(b){ return {key:b.key,name:b.name,addr:b.addr,sub:b.sub,map:b.map,tel:b.tel,classes:b.classes}; })};
   fdb.ref("site/info").set(JSON.parse(JSON.stringify(data))).then(function(){ setEditing(false); toast("저장되었습니다. 바로 적용됐어요"); },function(){ toast("저장하지 못했어요. 관리자 계정인지 확인해 주세요"); });
 });
 

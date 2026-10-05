@@ -65,8 +65,9 @@ header .btn{background:transparent;color:#fff;border-color:rgba(255,255,255,.35)
   <div id="listBox" class="hidden">
     <div class="bar">
       <select id="fBranch" aria-label="도장 선택"><option value="">전체 도장</option><option value="2관">2관</option><option value="1·3관">1·3관</option></select>
+      <select id="fType" aria-label="신청 구분"><option value="">전체 구분</option><option value="event">격파 이벤트 당첨</option><option value="normal">일반 체험 신청</option><option value="consult">온라인 상담</option></select>
       <select id="fDone" aria-label="연락 상태"><option value="">전체</option><option value="todo">연락 전</option><option value="done">연락 완료</option></select>
-      <button class="btn" id="csvBtn" type="button">엑셀(CSV) 받기</button>
+      <button class="btn" id="csvBtn" type="button" style="background:#1d7a4c;border-color:#1d7a4c;color:#fff">엑셀 파일 받기</button>
       <span class="sum" id="sum"></span>
     </div>
     <div id="list"></div>
@@ -74,6 +75,7 @@ header .btn{background:transparent;color:#fff;border-color:rgba(255,255,255,.35)
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -123,10 +125,12 @@ auth.onAuthStateChanged(function(u){
 function fmtTime(t){ if(!t) return ""; var d=new Date(t); return (d.getMonth()+1)+"/"+d.getDate()+" "+d.getHours()+":"+("0"+d.getMinutes()).slice(-2); }
 function fmtPhone(p){ p=String(p||""); return p.length===11?p.slice(0,3)+"-"+p.slice(3,7)+"-"+p.slice(7):p.length===10?p.slice(0,3)+"-"+p.slice(3,6)+"-"+p.slice(6):p; }
 function visitText(v){ if(!v) return ""; if(v==="오늘") return "당일 방문"; var p=v.split("-"); if(p.length!==3) return v; var d=new Date(+p[0],+p[1]-1,+p[2]); return (d.getMonth()+1)+"월 "+d.getDate()+"일("+"일월화수목금토"[d.getDay()]+")"; }
+function typeOf(r){ var p=r.prize||""; if(p==="온라인 상담") return "consult"; if(p===""||p==="일반 신청") return "normal"; return "event"; }
 function filtered(){
-  var fb=$("fBranch").value, fd=$("fDone").value;
-  return rows.filter(function(r){ return (!fb||r.branch===fb)&&(!fd||(fd==="done"?r.done:!r.done)); });
+  var fb=$("fBranch").value, fd=$("fDone").value, ft=$("fType").value;
+  return rows.filter(function(r){ return (!fb||r.branch===fb)&&(!fd||(fd==="done"?r.done:!r.done))&&(!ft||typeOf(r)===ft); });
 }
+
 function el(tag,cls,txt){ var e=document.createElement(tag); if(cls) e.className=cls; if(txt!=null) e.textContent=txt; return e; }
 function render(){
   var list=$("list"), data=filtered(); list.innerHTML="";
@@ -134,35 +138,58 @@ function render(){
   if(!data.length){ list.appendChild(el("p","note","아직 신청이 없어요. QR로 신청이 들어오면 여기에 바로 나타나요.")); return; }
   data.forEach(function(r){
     var box=el("div","item"+(r.done?" done":""));
-    var top=el("div","top"); top.appendChild(el("span","who",fmtPhone(r.phone))); top.appendChild(el("span","when","신청 "+fmtTime(r.createdAt))); box.appendChild(top);
+    var top=el("div","top"); top.appendChild(el("span","who",contactText(r))); top.appendChild(el("span","when","신청 "+fmtTime(r.createdAt))); box.appendChild(top);
     var info=el("div","info");
     info.appendChild(el("span","tag b",r.branch||""));
     if(r.prize) info.appendChild(el("span","tag",r.prize));
-    if(r.marketing) info.appendChild(el("span","tag m","소식 문자 동의"));
+    info.appendChild(el("span","tag"+(r.marketing?" m":""),r.marketing?"소식 문자 동의":"소식 문자 미동의"));
     info.appendChild(document.createElement("br"));
     info.appendChild(document.createTextNode(visitText(r.visit)+" · "+(r.cls||"")+" · "+(r.kids||"")));
     if(r.area||r.school){ info.appendChild(document.createElement("br")); info.appendChild(document.createTextNode("사는 곳: "+(r.area||"-")+" · 학교: "+(r.school||"-"))); }
     box.appendChild(info);
     var acts=el("div","acts");
-    var call=el("a","btn","전화"); call.href="tel:"+r.phone; acts.appendChild(call);
-    var sms=el("a","btn","문자"); sms.href="sms:"+r.phone; acts.appendChild(sms);
+    if(r.phone){ var call=el("a","btn","전화"); call.href="tel:"+r.phone; acts.appendChild(call);
+      var sms=el("a","btn","문자"); sms.href="sms:"+r.phone; acts.appendChild(sms); }
+    else if(r.contact==="kakao"){ var kk=el("a","btn","카톡 열기"); kk.href="https://open.kakao.com/o/sC74HRQi"; kk.target="_blank"; acts.appendChild(kk); }
     var dn=el("button","btn"+(r.done?" done-on":""),r.done?"연락 완료 ✓":"연락 완료로 표시"); dn.type="button";
     dn.addEventListener("click",function(){ ref.child(r.id).update({done:!r.done}); }); acts.appendChild(dn);
     var del=el("button","btn del","삭제"); del.type="button";
-    del.addEventListener("click",function(){ if(confirm(fmtPhone(r.phone)+" 신청을 삭제할까요?")) ref.child(r.id).remove(); }); acts.appendChild(del);
+    del.addEventListener("click",function(){ if(confirm(contactText(r)+" 신청을 삭제할까요?")) ref.child(r.id).remove(); }); acts.appendChild(del);
     box.appendChild(acts); list.appendChild(box);
   });
 }
-$("fBranch").addEventListener("change",render); $("fDone").addEventListener("change",render);
+$("fBranch").addEventListener("change",render); $("fDone").addEventListener("change",render); $("fType").addEventListener("change",render);
 
+function contactText(r){ if(r.phone) return fmtPhone(r.phone); return r.contact==="kakao"?"카톡 상담":"문자 신청 (번호는 문자함에서)"; }
+function kidRows(r){
+  if(Array.isArray(r.kidsList)&&r.kidsList.length) return r.kidsList;
+  return String(r.kids||"").split("/").filter(Boolean).map(function(s){ var p=s.trim().split(/\s+/); var age=p.pop()||"", g=p.pop()||""; return {name:p.join(" "),g:g,age:age}; });
+}
+function stage(age){ var n=parseInt(age,10); if(isNaN(n)) return age||""; return n<=7?"유치부":"초등부"; }
 $("csvBtn").addEventListener("click",function(){
-  var head=["신청시각","도장","당첨·구분","방문일","수업","아이","사는 곳","학교·유치원","보호자 연락처","소식 문자 동의","연락 완료"];
-  var q=function(s){ s=String(s==null?"":s); return '"'+s.replace(/"/g,'""')+'"'; };
-  var lines=[head.map(q).join(",")];
-  filtered().forEach(function(r){ lines.push([new Date(r.createdAt||0).toLocaleString("ko-KR"),r.branch,r.prize,visitText(r.visit),r.cls,r.kids,r.area||"",r.school||"",fmtPhone(r.phone),r.marketing?"동의":"",r.done?"완료":""].map(q).join(",")); });
-  var blob=new Blob(["\ufeff"+lines.join("\r\n")],{type:"text/csv;charset=utf-8"});
-  var a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="체험신청명단.csv"; document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(function(){URL.revokeObjectURL(a.href);},2000);
+  var data=filtered();
+  if(!data.length){ alert("받을 신청이 없어요."); return; }
+  var head=["학교·유치원","구분","성별","도장","나이","사는 곳","연락 방법","신청 일시","신청 종류","방문 희망일","희망 수업","소식 문자 동의","연락 완료"];
+  var aoa=[head];
+  data.forEach(function(r){
+    var kind=typeOf(r)==="event"?"격파 이벤트 ("+r.prize+")":typeOf(r)==="consult"?"온라인 상담":"일반 체험 신청";
+    var ks=kidRows(r); if(!ks.length) ks=[{name:"",g:"",age:""}];
+    ks.forEach(function(k){
+      aoa.push([r.school||"",stage(k.age),k.g||"",r.branch||"",k.age||"",r.area||"",contactText(r),new Date(r.createdAt||0).toLocaleString("ko-KR"),kind,visitText(r.visit),r.cls||"",r.marketing?"동의":"미동의",r.done?"완료":""]);
+    });
+  });
+  var d=new Date(), stamp=d.getFullYear()+String(d.getMonth()+1).padStart(2,"0")+String(d.getDate()).padStart(2,"0");
+  if(window.XLSX){
+    var ws=XLSX.utils.aoa_to_sheet(aoa);
+    ws["!cols"]=[{wch:16},{wch:8},{wch:6},{wch:8},{wch:8},{wch:16},{wch:15},{wch:20},{wch:20},{wch:14},{wch:18},{wch:12},{wch:8}];
+    ws["!autofilter"]={ref:"A1:M"+aoa.length};
+    var wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,"신청 명단");
+    XLSX.writeFile(wb,"jeongdo_signups_"+stamp+".xlsx");
+  } else {
+    var q=function(s){ s=String(s==null?"":s); return '"'+s.replace(/"/g,'""')+'"'; };
+    var blob=new Blob(["\ufeff"+aoa.map(function(r){ return r.map(q).join(","); }).join("\r\n")],{type:"text/csv;charset=utf-8"});
+    var a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="jeongdo_signups_"+stamp+".csv"; document.body.appendChild(a); a.click(); a.remove();
+  }
 });
 $("cleanBtn").addEventListener("click",function(){
   var limit=Date.now()-1000*60*60*24*92, old=rows.filter(function(r){return (r.createdAt||0)<limit;});
